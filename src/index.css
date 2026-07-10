@@ -259,7 +259,7 @@ input[type='range'] { accent-color: var(--brand); width: 220px; }
 .canvas-toolbar .status.live { background: var(--green-bg); color: #067A57; border-color: var(--green-bd); }
 .canvas-toolbar .spacer { flex: 1; }
 .canvas-toolbar .cname { font-weight: 600; font-size: 14px; }
-.canvas-shell { background: #FBFBFD; border: 1px solid var(--line); border-radius: var(--radius); height: calc(100vh - 232px); min-height: 440px; position: relative; overflow: hidden; background-image: radial-gradient(#DADDE3 1px, transparent 1px); background-size: 22px 22px; box-shadow: inset 0 1px 3px rgba(16, 24, 40, 0.04); }
+.canvas-shell { background: #FBFBFD; border: 1px solid var(--line); border-radius: var(--radius); height: calc(100vh - 232px); min-height: 440px; position: relative; overflow: hidden; box-shadow: inset 0 1px 3px rgba(16, 24, 40, 0.04); }
 .chain { display: flex; align-items: center; padding: 56px 44px; overflow-x: auto; height: 100%; }
 .node { width: 232px; flex-shrink: 0; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; animation: fadeUp 0.3s ease; box-shadow: var(--shadow-md); }
 .node.trigger { border: 1.5px solid var(--brand); box-shadow: 0 8px 24px -8px var(--brand-shadow); }
@@ -283,6 +283,38 @@ input[type='range'] { accent-color: var(--brand); width: 220px; }
 .palette button { display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: none; color: var(--tx2); font-size: 12.5px; font-weight: 500; padding: 9px 10px; border-radius: 8px; text-align: left; }
 .palette button:hover { background: var(--cream); color: var(--tx); }
 .palette .sw { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
+.palette.up { position: absolute; bottom: calc(100% + 10px); top: auto; }
+
+/* ── React Flow canvas engine (P1) ────────────────────────────── */
+.canvas-shell .react-flow { width: 100%; height: 100%; background: transparent; }
+.canvas-shell .react-flow__attribution { display: none; }
+/* our .node card renders 1:1 inside the RF node wrapper */
+.react-flow__node-app { width: 232px; }
+.react-flow__node-app.selected .node { box-shadow: 0 0 0 2px var(--brand), var(--shadow-md); border-color: var(--brand); }
+/* connect handles are non-interactive in P1; keep them out of the way */
+.rf-handle { width: 8px; height: 8px; min-width: 0; min-height: 0; border: none; background: transparent; }
+.rf-handle.terminal { background: #F0AA7B; box-shadow: 0 0 0 3px #FBFBFD; }
+/* entry-trigger badge on the first node (replaces the old Start node) */
+.node.is-entry { border: 1.5px solid var(--brand); box-shadow: 0 8px 24px -8px var(--brand-shadow); }
+.node-entry-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brand); background: var(--cream); border: 1px solid var(--brand-border); border-radius: 20px; padding: 3px 9px; margin-bottom: 9px; }
+
+/* empty journey → a single centered ＋ button, nothing else */
+.canvas-empty { position: absolute; inset: 0; display: grid; place-items: center; z-index: 6; pointer-events: none; }
+.canvas-empty > * { pointer-events: auto; }
+.canvas-empty .add-node { width: 172px; height: 104px; }
+
+/* bottom-center floating toolbar */
+.canvas-bottom-bar { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 6px; z-index: 8; }
+.cbtn { height: 32px; min-width: 32px; padding: 0 9px; border: none; background: none; border-radius: 8px; color: var(--tx2); font-size: 16px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.18s; }
+.cbtn:hover { background: var(--cream); color: var(--tx); }
+.cbtn svg { stroke: currentColor; }
+.cbtn.add { font-size: 12.5px; font-weight: 600; padding: 0 13px; color: var(--brand); }
+.cbtn.add .plus { font-size: 15px; }
+.cbtn.add:hover { background: var(--cream); }
+.cbtn:disabled { opacity: 0.4; pointer-events: none; }
+.cbar-sep { width: 1px; align-self: stretch; background: var(--line); margin: 2px 3px; }
+.cbar-add { position: relative; }
+.cbar-add .palette { left: auto; right: 0; transform: none; }
 
 .toast { position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%) translateY(16px); background: #1C1C28; border-radius: 10px; padding: 11px 18px; font-size: 12.5px; font-weight: 500; color: #fff; opacity: 0; pointer-events: none; transition: all 0.3s ease; z-index: 200; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 9px; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
