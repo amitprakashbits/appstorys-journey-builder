@@ -7,12 +7,70 @@ export function Radio(props: {
   checked: boolean
   onChange: () => void
 }) {
+  /* Selected styling derives from the `checked` prop (React state), NOT from
+     the native :checked pseudo-class alone — so the visual can never drift
+     out of sync with state if two radio groups ever share a DOM name. */
   return (
-    <label className="radio">
+    <label className={`radio ${props.checked ? 'selected' : ''}`}>
       <input type="radio" name={props.name} checked={props.checked} onChange={props.onChange} />
       <span className="r-dot" />
       <span>{props.label}</span>
     </label>
+  )
+}
+
+/* ── RadioRail — single-select vertical rail ──────────────────────
+   One controlled source of truth (`selectedId`) per rail. The radio group
+   `name` is namespaced by a per-instance React id so two rails can never
+   collide at the DOM level (the historical multi-select bug). Optional
+   `group` on an item renders a section header when the group changes. */
+export interface RailItem<Id extends string = string> {
+  id: Id
+  label: string
+  group?: string
+}
+
+export function RadioRail<Id extends string>(props: {
+  /** Stable rail identifier, used (with a per-instance id) as the radio name. */
+  rail: string
+  items: RailItem<Id>[]
+  selectedId: Id
+  onSelect: (id: Id) => void
+  className?: string
+}) {
+  const name = `${props.rail}-${React.useId()}`
+
+  /* Dev invariant: with a single scalar source of truth, at most one item can
+     resolve as selected. More than one means duplicate item ids upstream. */
+  if (import.meta.env.DEV) {
+    const selectedCount = props.items.filter(it => it.id === props.selectedId).length
+    if (selectedCount > 1) {
+      // eslint-disable-next-line no-console
+      console.error(
+        `[RadioRail:${props.rail}] ${selectedCount} items resolve as selected for "${props.selectedId}" — rail item ids must be unique.`,
+      )
+    }
+  }
+
+  let lastGroup: string | undefined
+  return (
+    <div className={props.className}>
+      {props.items.map(it => {
+        const header = it.group && it.group !== lastGroup ? it.group : null
+        lastGroup = it.group
+        return (
+          <React.Fragment key={it.id}>
+            {header && <div className="rail-group">{header}</div>}
+            <Radio
+              name={name}
+              label={it.label}
+              checked={it.id === props.selectedId}
+              onChange={() => props.onSelect(it.id)}
+            />
+          </React.Fragment>
+        )
+      })}
+    </div>
   )
 }
 

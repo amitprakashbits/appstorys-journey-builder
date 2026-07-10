@@ -162,6 +162,11 @@ body {
 .radio input:checked + .r-dot { border-color: var(--brand); }
 .radio input:checked + .r-dot::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--brand); }
 .radio input:checked ~ span:last-child { color: var(--tx); font-weight: 500; }
+/* State-derived selection (mirrors :checked) so styling follows React state,
+   never a stale DOM :checked from a colliding radio group name. */
+.radio.selected .r-dot { border-color: var(--brand); }
+.radio.selected .r-dot::after { content: ''; position: absolute; inset: 3px; border-radius: 50%; background: var(--brand); }
+.radio.selected span:last-child { color: var(--tx); font-weight: 500; }
 
 .toggle { position: relative; width: 38px; height: 21px; flex-shrink: 0; cursor: pointer; display: inline-block; }
 .toggle input { display: none; }

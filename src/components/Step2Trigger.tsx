@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
-import { Card, Radio, TimeGroup, TimezoneRow, ToggleRow } from './ui'
+import { Card, Radio, RadioRail, TimeGroup, TimezoneRow, ToggleRow } from './ui'
+import type { RailItem } from './ui'
 import type { EventCondition, ExitCondition, FixedSchedule, TriggerType } from '../types'
 
 /* ── option lists ─────────────────────────────────────────────── */
@@ -15,6 +16,28 @@ const APP_EVENTS = [
 const EXIT_EVENTS = ['Select an event', 'Subscription_Purchased', 'Account_Deleted', 'Uninstall']
 const JOURNEYS = ['Select journey', 'US Stocks RFI Reminder', 'KYC Onboarding v2', 'SIP Winback — Q2', 'Digital Gold Launch']
 const EXIT_STAGES = ['any exit', 'Goal met', 'Exit: no-CTA', 'Expired']
+
+/* ── selection rails (single source of truth, stable ids) ─────── */
+const START_RAIL: RailItem<'asap' | 'date'>[] = [
+  { id: 'asap', label: 'As soon as possible', group: 'Start' },
+  { id: 'date', label: 'At specific date and time', group: 'Start' },
+]
+const FIXED_RAIL: RailItem<FixedSchedule>[] = [
+  { id: 'asap', label: 'As soon as possible', group: 'One time' },
+  { id: 'date', label: 'At specific date and time', group: 'One time' },
+  { id: 'daily', label: 'Daily', group: 'Periodic' },
+  { id: 'weekly', label: 'Weekly', group: 'Periodic' },
+  { id: 'monthly', label: 'Monthly', group: 'Periodic' },
+]
+const WEEK_DAYS = [
+  { id: 'sun', label: 'S' },
+  { id: 'mon', label: 'M' },
+  { id: 'tue', label: 'T' },
+  { id: 'wed', label: 'W' },
+  { id: 'thu', label: 'T' },
+  { id: 'fri', label: 'F' },
+  { id: 'sat', label: 'S' },
+]
 
 let condSeq = 100
 
@@ -106,15 +129,18 @@ function ExitConditionsCard() {
 function ScheduleCard(props: { scope: string; toast: (m: string, k?: 'ok' | 'err') => void }) {
   const [pane, setPane] = useState<'asap' | 'date'>('asap')
   const [ends, setEnds] = useState<'never' | 'on'>('never')
+  const endsName = `ends-${React.useId()}`
   return (
     <Card title="Journey schedule">
       <div className="spacer-10" />
       <div className="sched">
-        <div className="sched-rail">
-          <div className="rail-group">Start</div>
-          <Radio name={`sched-${props.scope}`} label="As soon as possible" checked={pane === 'asap'} onChange={() => setPane('asap')} />
-          <Radio name={`sched-${props.scope}`} label="At specific date and time" checked={pane === 'date'} onChange={() => setPane('date')} />
-        </div>
+        <RadioRail
+          className="sched-rail"
+          rail={`sched-${props.scope}`}
+          items={START_RAIL}
+          selectedId={pane}
+          onSelect={setPane}
+        />
         <div className="sched-body">
           <button className="ghost-link sched-reset" onClick={() => props.toast('Schedule reset to defaults')}>
             Reset to defaults
@@ -125,8 +151,8 @@ function ScheduleCard(props: { scope: string; toast: (m: string, k?: 'ok' | 'err
               <TimezoneRow />
               <div className="ends-row">
                 <span className="ends-label">Ends</span>
-                <Radio name={`ends-${props.scope}`} label="Never" checked={ends === 'never'} onChange={() => setEnds('never')} />
-                <Radio name={`ends-${props.scope}`} label="On" checked={ends === 'on'} onChange={() => setEnds('on')} />
+                <Radio name={endsName} label="Never" checked={ends === 'never'} onChange={() => setEnds('never')} />
+                <Radio name={endsName} label="On" checked={ends === 'on'} onChange={() => setEnds('on')} />
                 {ends === 'on' && <input className="text-input input-md" defaultValue="31 Dec 2026, 11:59 pm" />}
               </div>
             </div>
@@ -163,6 +189,7 @@ function EventPanel(props: {
   toast: (m: string, k?: 'ok' | 'err') => void
 }) {
   const [delayed, setDelayed] = useState(false)
+  const delayName = `delay-event-${React.useId()}`
   const remove = (id: number) => {
     if (props.conds.length <= 1) {
       props.toast('At least one condition is required', 'err')
@@ -213,8 +240,8 @@ function EventPanel(props: {
 
       <Card title="Then enter the user">
         <div className="radio-row" style={{ marginTop: 10 }}>
-          <Radio name="delay-event" label="Immediately" checked={!delayed} onChange={() => setDelayed(false)} />
-          <Radio name="delay-event" label="With delay" checked={delayed} onChange={() => setDelayed(true)} />
+          <Radio name={delayName} label="Immediately" checked={!delayed} onChange={() => setDelayed(false)} />
+          <Radio name={delayName} label="With delay" checked={delayed} onChange={() => setDelayed(true)} />
           {delayed && (
             <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
               <input className="text-input input-sm" type="number" defaultValue={30} min={1} />
@@ -260,15 +287,13 @@ function FixedPanel(props: { toast: (m: string, k?: 'ok' | 'err') => void }) {
       <Card title="User entry">
         <div className="spacer-10" />
         <div className="sched">
-          <div className="sched-rail">
-            <div className="rail-group">One time</div>
-            <Radio name="sched-fixed" label="As soon as possible" checked={pane === 'asap'} onChange={() => setPane('asap')} />
-            <Radio name="sched-fixed" label="At specific date and time" checked={pane === 'date'} onChange={() => setPane('date')} />
-            <div className="rail-group">Periodic</div>
-            <Radio name="sched-fixed" label="Daily" checked={pane === 'daily'} onChange={() => setPane('daily')} />
-            <Radio name="sched-fixed" label="Weekly" checked={pane === 'weekly'} onChange={() => setPane('weekly')} />
-            <Radio name="sched-fixed" label="Monthly" checked={pane === 'monthly'} onChange={() => setPane('monthly')} />
-          </div>
+          <RadioRail
+            className="sched-rail"
+            rail="sched-fixed"
+            items={FIXED_RAIL}
+            selectedId={pane}
+            onSelect={setPane}
+          />
           <div className="sched-body">
             <button className="ghost-link sched-reset" onClick={() => props.toast('Schedule reset to defaults')}>
               Reset to defaults
@@ -323,13 +348,13 @@ function FixedPanel(props: { toast: (m: string, k?: 'ok' | 'err') => void }) {
                 <>
                   <label className="field-label">Repeat on</label>
                   <div className="day-chips">
-                    {['S', 'M', 'T', 'W', 'T', 'F', 'S'].map((d, i) => (
+                    {WEEK_DAYS.map((d, i) => (
                       <button
-                        key={i}
+                        key={d.id}
                         className={`day-chip ${days[i] ? 'on' : ''}`}
                         onClick={() => setDays(days.map((v, j) => (j === i ? !v : v)))}
                       >
-                        {d}
+                        {d.label}
                       </button>
                     ))}
                   </div>
@@ -395,6 +420,7 @@ function ExitPanel(props: {
   toast: (m: string, k?: 'ok' | 'err') => void
 }) {
   const [delayed, setDelayed] = useState(true)
+  const delayName = `delay-exit-${React.useId()}`
   const remove = (id: number) => {
     if (props.conds.length <= 1) {
       props.toast('At least one condition is required', 'err')
@@ -457,8 +483,8 @@ function ExitPanel(props: {
 
       <Card title="Then user enters the journey">
         <div className="radio-row" style={{ marginTop: 10 }}>
-          <Radio name="delay-exit" label="Immediately" checked={!delayed} onChange={() => setDelayed(false)} />
-          <Radio name="delay-exit" label="With delay" checked={delayed} onChange={() => setDelayed(true)} />
+          <Radio name={delayName} label="Immediately" checked={!delayed} onChange={() => setDelayed(false)} />
+          <Radio name={delayName} label="With delay" checked={delayed} onChange={() => setDelayed(true)} />
           {delayed && (
             <span style={{ display: 'inline-flex', gap: 8, alignItems: 'center' }}>
               <input
