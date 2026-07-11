@@ -61,24 +61,37 @@ App.tsx ──props──▶ Canvas.tsx ──▶ JourneyCanvas (ReactFlowProvid
 - **Undo/redo:** bounded (50) past/future stacks of `{nodes, edges, entryId}`
   snapshots. Continuous ops (drag, arrow-nudge) coalesce to one entry.
 
-## Adding a new node kind (registry steps)
+## Node catalog
 
-1. Add the literal to `NodeKind` in `src/canvas/types.ts` and a `…Config`
-   variant to the `JourneyNodeConfig` union.
-2. Add a `NODE_KINDS[kind]` entry in `src/canvas/registry.ts` (label, color,
-   category, description, defaults; `branches` if it forks like Condition) and a
-   `case` in `makeDefaultConfig` — the `never` guard makes a missing case a
-   compile error.
-3. Add it to a `PALETTE_CATEGORIES` group, and add a `case` to `summarize()`
-   (the node-card meta line) — again `never`-guarded.
-4. Add an editor to `NODE_EDITORS` in `src/canvas/editors/` — the registry is
-   typed `{ [K in NodeKind]: EditorFor<K> }`, so a missing editor is a **compile
-   error** (no dead nodes). Double-clicking a node (or its toolbar Edit button)
-   opens the right-side `NodeEditorSheet`, which renders this editor against a
-   draft config and writes back via `updateNodeData` on Save.
+22 types across 6 families, all driven off the registry:
 
-That is all — the custom node renderer, palette, minimap tint, validation and
-editor are all driven off the registries.
+- **Campaigns** (in-app messaging, 12): Animations, Bottom Sheet, Carousel,
+  Element Spotlight, Floater, Gamification, Modal, Page Pop, Pinned Banner,
+  Tooltip, Video, Widgets
+- **Messages** (4): Push Notification, WhatsApp, Email, SMS
+- **Branching** (2): Conditional branch (YES/NO), Random split branch (weighted paths)
+- **Delay** (1): Delay · **Data** (2): Update Backend Attribute, Add/update a Live Segment
+- **Flow control** (1): Jump / Go to node
+
+Each `kind` belongs to a `family` (drives accent colour + palette grouping) and
+carries a per-kind config (`ConfigByKind`). Campaign types are "create or import"
+with content edited in the campaign flow (handoff); branching kinds expose output
+branches via `branchesFor()`.
+
+## Adding a new node kind (four typed touch-points)
+
+1. **Type** — add the literal to `NodeKind` (`src/canvas/types.ts`) and its config
+   shape to `ConfigByKind`.
+2. **Registry** — add a `NODE_TYPES[kind]` entry (family, name, description,
+   defaultTitle) in `registry.ts`, plus a `case` in `makeDefaultConfig` and in
+   `summarize` (the node-card meta line). Both are `never`-guarded → a missing
+   case is a compile error. If it forks, extend `branchesFor`.
+3. **Icon** — add a glyph to `NODE_ICONS` in `icons.tsx` (typed `Record<NodeKind,…>`).
+4. **Editor** — add a bespoke editor to `NODE_EDITORS` in `editors/` (typed
+   `{ [K in NodeKind]: EditorFor<K> }`) so there are **no dead nodes**.
+
+The palette (auto-grouped by family with live counts), minimap tint, publish
+validation and the editor sheet all pick it up automatically.
 
 ## Notes / follow-ups
 

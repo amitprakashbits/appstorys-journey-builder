@@ -51,7 +51,7 @@ function JourneyEdgeViewBase(props: EdgeProps<JourneyEdgeData>) {
             aria-label="Insert step here"
             onClick={e => {
               e.stopPropagation()
-              ctx.onInsertOnEdge(id, e.clientX, e.clientY)
+              ctx.onInsertOnEdge(id)
             }}
           >
             ＋

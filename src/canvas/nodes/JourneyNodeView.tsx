@@ -1,11 +1,11 @@
 import { memo } from 'react'
 import { Handle, NodeToolbar, Position, useStore } from 'reactflow'
 import type { NodeProps } from 'reactflow'
-import { NODE_KINDS } from '../registry'
+import { NODE_TYPES, branchesFor } from '../registry'
+import { NodeGlyph } from '../icons'
 import { useCanvasContext } from '../context'
 import type { JourneyNodeData } from '../types'
 
-/* toolbar icons — small, currentColor stroke */
 const I = {
   edit: <path d="M4 20h4L18.5 9.5a2.1 2.1 0 0 0-3-3L5 17v3z" />,
   dup: (
@@ -29,11 +29,11 @@ function ToolbarBtn(props: { d: React.ReactNode; label: string; onClick: () => v
 }
 
 function JourneyNodeViewBase({ id, data, selected }: NodeProps<JourneyNodeData>) {
-  const def = NODE_KINDS[data.kind]
+  const def = NODE_TYPES[data.kind]
   const ctx = useCanvasContext()
   const isEntry = ctx.entryId === id
+  const branches = branchesFor(data.kind, data.config)
 
-  /* outgoing edges by handle, read from the store (updates as edges change) */
   const outgoing = useStore(s => s.edges.filter(e => e.source === id).map(e => e.sourceHandle ?? '__single__'))
   const hasOut = (handle: string) => outgoing.includes(handle)
 
@@ -55,25 +55,35 @@ function JourneyNodeViewBase({ id, data, selected }: NodeProps<JourneyNodeData>)
           <span className="live-dot" /> {ctx.entryBadge}
         </div>
       )}
-      <div className={`node-kind ${def.cls}`}>{def.label}</div>
+      <div className="node-kind" style={{ color: def.color }}>
+        <span className="node-glyph">
+          <NodeGlyph kind={data.kind} size={13} />
+        </span>
+        {def.name}
+      </div>
       <div className="node-title">{data.title}</div>
       <div className="node-meta">{data.meta}</div>
 
-      {def.branches ? (
-        <div className="node-branches">
-          {def.branches.map((b, i) => (
-            <div className="branch-row" key={b.id}>
-              <span className={`branch-chip ${b.tone}`}>{b.label}</span>
-              <Handle
-                type="source"
-                id={b.id}
-                position={Position.Right}
-                className={`rf-handle source ${hasOut(b.id) ? '' : 'terminal'}`}
-                style={{ top: `calc(100% - ${(def.branches!.length - i) * 24 - 8}px)` }}
-              />
-            </div>
+      {branches.length > 0 ? (
+        <>
+          <div className="node-branches">
+            {branches.map(b => (
+              <span className={`branch-chip ${b.tone}`} key={b.id}>
+                {b.label}
+              </span>
+            ))}
+          </div>
+          {branches.map((b, i) => (
+            <Handle
+              key={b.id}
+              type="source"
+              id={b.id}
+              position={Position.Right}
+              className={`rf-handle source ${hasOut(b.id) ? '' : 'terminal'}`}
+              style={{ top: `${((i + 1) / (branches.length + 1)) * 100}%` }}
+            />
           ))}
-        </div>
+        </>
       ) : (
         <Handle type="source" position={Position.Right} className={`rf-handle source ${hasOut('__single__') ? '' : 'terminal'}`} />
       )}

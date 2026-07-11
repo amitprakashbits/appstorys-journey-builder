@@ -1,116 +1,215 @@
-import type { JourneyNodeConfig, NodeKind } from './types'
+import type { Branch, CampaignBase, ConfigByKind, JourneyNodeConfig, NodeFamily, NodeKind } from './types'
 
-export interface Branch {
-  id: 'yes' | 'no'
-  label: string
-  tone: 'yes' | 'no'
-}
-
-export interface NodeKindDef {
+export interface NodeTypeDef {
   kind: NodeKind
-  label: string
-  cls: string // existing .node-kind color class in index.css
-  color: string // accent hex (for minimap / swatches)
-  category: 'Messaging' | 'Logic'
+  family: NodeFamily
+  name: string
   description: string
+  color: string
   defaultTitle: string
-  defaultMeta: string
-  /* Condition splits its output into labelled branches; other kinds have a
-     single implicit source handle. */
-  branches?: Branch[]
 }
 
-export const NODE_KINDS: Record<NodeKind, NodeKindDef> = {
-  story: {
-    kind: 'story',
-    label: 'Story',
-    cls: 'k-story',
-    color: '#8B5CF6',
-    category: 'Messaging',
-    description: 'Show a full-screen story campaign',
-    defaultTitle: 'US Stocks intro story',
-    defaultMeta: '4 slides · CTR —',
-  },
-  push: {
-    kind: 'push',
-    label: 'Push notification',
-    cls: 'k-push',
-    color: '#3B82F6',
-    category: 'Messaging',
-    description: 'Send a push notification',
-    defaultTitle: 'Complete your RFI',
-    defaultMeta: 'High priority · CTR —',
-  },
-  cond: {
-    kind: 'cond',
-    label: 'Condition',
-    cls: 'k-cond',
-    color: '#F59E0B',
-    category: 'Logic',
-    description: 'Branch on a property or event',
-    defaultTitle: 'KYC complete?',
-    defaultMeta: 'YES / NO branch',
-    branches: [
-      { id: 'yes', label: 'YES', tone: 'yes' },
-      { id: 'no', label: 'NO', tone: 'no' },
-    ],
-  },
-  delay: {
-    kind: 'delay',
-    label: 'Wait / delay',
-    cls: 'k-delay',
-    color: '#6B7280',
-    category: 'Logic',
-    description: 'Pause the journey for a period',
-    defaultTitle: 'Wait 24 hours',
-    defaultMeta: 'Respects DND window',
-  },
+/* accent colour per family (node cards + minimap + palette tiles) */
+export const FAMILY_COLOR: Record<NodeFamily, string> = {
+  campaign: '#FB6514',
+  message: '#3B82F6',
+  branching: '#F59E0B',
+  delay: '#6B7280',
+  data: '#8B5CF6',
+  flow: '#10B981',
 }
 
-export const PALETTE_CATEGORIES: { name: NodeKindDef['category']; kinds: NodeKind[] }[] = [
-  { name: 'Messaging', kinds: ['story', 'push'] },
-  { name: 'Logic', kinds: ['cond', 'delay'] },
-]
-
-/* Meta line shown on the node card, derived from its config. Exhaustive. */
-export function summarize(config: JourneyNodeConfig): string {
-  switch (config.kind) {
-    case 'story':
-      return config.campaignId ? `${config.campaignName} · CTR —` : 'No campaign selected'
-    case 'push':
-      return `${config.priority === 'high' ? 'High' : 'Normal'} priority · CTR —`
-    case 'cond':
-      return `${config.rows.length} rule${config.rows.length === 1 ? '' : 's'} · ${config.yesLabel} / ${config.noLabel}`
-    case 'delay':
-      return `Wait ${config.amount} ${config.unit.toLowerCase()}${config.respectDnd ? ' · Respects DND' : ''}`
-    default: {
-      const _exhaustive: never = config
-      return _exhaustive
-    }
-  }
+export const FAMILY_LABEL: Record<NodeFamily, string> = {
+  campaign: 'Campaigns',
+  message: 'Messages',
+  branching: 'Branching',
+  delay: 'Delay',
+  data: 'Data',
+  flow: 'Flow control',
 }
 
-let cfgSeq = 0
+const T = (kind: NodeKind, family: NodeFamily, name: string, description: string, defaultTitle: string): NodeTypeDef => ({
+  kind,
+  family,
+  name,
+  description,
+  color: FAMILY_COLOR[family],
+  defaultTitle,
+})
 
-/* Exhaustive over NodeKind — a new kind without a case is a compile error. */
+export const NODE_TYPES: Record<NodeKind, NodeTypeDef> = {
+  // Campaigns — in-app messaging
+  animations: T('animations', 'campaign', 'Animations', 'Lottie & motion overlays', 'Welcome animation'),
+  bottomsheet: T('bottomsheet', 'campaign', 'Bottom Sheet', 'Slide-up panel from the bottom', 'Bottom sheet'),
+  carousel: T('carousel', 'campaign', 'Carousel', 'Swipeable multi-card set', 'Feature carousel'),
+  spotlight: T('spotlight', 'campaign', 'Element Spotlight', 'Highlight a specific UI element', 'Spotlight'),
+  floater: T('floater', 'campaign', 'Floater', 'Persistent floating button', 'Floating button'),
+  gamification: T('gamification', 'campaign', 'Gamification', 'Spin, scratch & reward games', 'Spin the wheel'),
+  modal: T('modal', 'campaign', 'Modal', 'Centered popup dialog', 'Welcome modal'),
+  pagepop: T('pagepop', 'campaign', 'Page Pop', 'Full-screen takeover', 'Full-screen takeover'),
+  pinnedbanner: T('pinnedbanner', 'campaign', 'Pinned Banner', 'Sticky top strip', 'Pinned banner'),
+  tooltip: T('tooltip', 'campaign', 'Tooltip', 'Anchored hint bubble', 'Feature tooltip'),
+  video: T('video', 'campaign', 'Video', 'Embedded video message', 'Product video'),
+  widgets: T('widgets', 'campaign', 'Widgets', 'Embedded native widget', 'Home widget'),
+  // Messages
+  push: T('push', 'message', 'Push Notification', 'Re-engage with a system push', 'Complete your RFI'),
+  whatsapp: T('whatsapp', 'message', 'WhatsApp', 'Message via WhatsApp Business', 'WhatsApp nudge'),
+  email: T('email', 'message', 'Email', 'Send a templated email', 'Onboarding email'),
+  sms: T('sms', 'message', 'SMS', 'Send a plain text message', 'SMS reminder'),
+  // Branching
+  cond: T('cond', 'branching', 'Conditional branch', 'Route users by an audience filter', 'KYC complete?'),
+  randomsplit: T('randomsplit', 'branching', 'Random split branch', 'Randomly split into weighted paths', 'A/B split'),
+  // Delay
+  delay: T('delay', 'delay', 'Delay', 'Wait a set time before the next node', 'Wait 24 hours'),
+  // Data
+  setattr: T('setattr', 'data', 'Update Backend Attribute', 'Set or change a user attribute', 'Set attribute'),
+  segment: T('segment', 'data', 'Add / update a Live Segment', 'Add or remove users from a segment', 'Update segment'),
+  // Flow control
+  jump: T('jump', 'flow', 'Jump / Go to node', 'Send the user to another node', 'Go to node'),
+}
+
+/* palette category rail order + membership */
+export const FAMILY_ORDER: NodeFamily[] = ['campaign', 'message', 'branching', 'delay', 'data', 'flow']
+export const KINDS_BY_FAMILY: Record<NodeFamily, NodeKind[]> = FAMILY_ORDER.reduce(
+  (acc, fam) => {
+    acc[fam] = (Object.keys(NODE_TYPES) as NodeKind[]).filter(k => NODE_TYPES[k].family === fam)
+    return acc
+  },
+  {} as Record<NodeFamily, NodeKind[]>,
+)
+
+let seq = 0
+const campaignBase = (): CampaignBase => ({ source: 'import', campaignId: null, campaignName: '' })
+
+/* exhaustive: a new kind without a case is a compile error */
 export function makeDefaultConfig(kind: NodeKind): JourneyNodeConfig {
   switch (kind) {
-    case 'story':
-      return { kind, campaignId: null, campaignName: 'US Stocks intro story' }
+    case 'animations':
+      return { ...campaignBase(), loop: true }
+    case 'bottomsheet':
+      return { ...campaignBase(), height: 'half', dismissible: true }
+    case 'carousel':
+      return { ...campaignBase(), cards: 3, autoplay: false }
+    case 'spotlight':
+      return { ...campaignBase(), anchor: '', style: 'pulse' }
+    case 'floater':
+      return { ...campaignBase(), position: 'br', label: '' }
+    case 'gamification':
+      return { ...campaignBase(), game: 'spin', reward: '' }
+    case 'modal':
+      return { ...campaignBase(), size: 'md', dismissible: true }
+    case 'pagepop':
+      return { ...campaignBase(), dismissible: true }
+    case 'pinnedbanner':
+      return { ...campaignBase(), position: 'top', dismissible: true }
+    case 'tooltip':
+      return { ...campaignBase(), anchor: '', placement: 'bottom' }
+    case 'video':
+      return { ...campaignBase(), url: '', autoplay: false }
+    case 'widgets':
+      return { ...campaignBase(), widgetId: '' }
     case 'push':
-      return { kind, title: 'Complete your RFI', body: '', priority: 'high', deepLink: '' }
+      return { title: 'Complete your RFI', body: '', deepLink: '', priority: 'high' }
+    case 'whatsapp':
+      return { templateId: '', phoneField: 'phone', params: '' }
+    case 'email':
+      return { subject: '', templateId: '', fromName: 'Tickertape' }
+    case 'sms':
+      return { body: '', senderId: 'TICKR' }
     case 'cond':
+      return { rows: [{ id: `r${++seq}`, property: 'KYC status', operator: 'is', value: 'Complete' }], yesLabel: 'YES', noLabel: 'NO' }
+    case 'randomsplit':
       return {
-        kind,
-        rows: [{ id: `r${++cfgSeq}`, property: 'KYC status', operator: 'is', value: 'Complete' }],
-        yesLabel: 'YES',
-        noLabel: 'NO',
+        paths: [
+          { id: `p${++seq}`, label: 'Variant A', weight: 50 },
+          { id: `p${++seq}`, label: 'Variant B', weight: 50 },
+        ],
       }
     case 'delay':
-      return { kind, amount: 24, unit: 'Hours', respectDnd: true }
+      return { amount: 24, unit: 'Hours', respectDnd: true }
+    case 'setattr':
+      return { attribute: '', value: '' }
+    case 'segment':
+      return { action: 'add', segment: '' }
+    case 'jump':
+      return { targetId: null }
     default: {
       const _exhaustive: never = kind
       return _exhaustive
     }
   }
+}
+
+export function newSplitPath(): ConfigByKind['randomsplit']['paths'][number] {
+  return { id: `p${++seq}`, label: 'New path', weight: 0 }
+}
+export function newCondRow(): ConfigByKind['cond']['rows'][number] {
+  return { id: `r${++seq}`, property: 'Platform', operator: 'is', value: '' }
+}
+
+/* node-card meta line, derived from config. `kind` selects the shape. */
+export function summarize(kind: NodeKind, config: JourneyNodeConfig): string {
+  const fam = NODE_TYPES[kind].family
+  if (fam === 'campaign') {
+    const c = config as CampaignBase
+    return c.campaignId ? `${c.source === 'create' ? 'New' : 'Imported'} · ${c.campaignName || NODE_TYPES[kind].name}` : 'Not configured'
+  }
+  switch (kind) {
+    case 'push':
+      return `${(config as ConfigByKind['push']).priority === 'high' ? 'High' : 'Normal'} priority`
+    case 'whatsapp': {
+      const c = config as ConfigByKind['whatsapp']
+      return c.templateId ? `Template ${c.templateId}` : 'No template'
+    }
+    case 'email': {
+      const c = config as ConfigByKind['email']
+      return c.subject || 'No subject'
+    }
+    case 'sms': {
+      const c = config as ConfigByKind['sms']
+      return c.body ? `“${c.body.slice(0, 24)}${c.body.length > 24 ? '…' : ''}”` : 'No message'
+    }
+    case 'cond': {
+      const c = config as ConfigByKind['cond']
+      return `${c.rows.length} rule${c.rows.length === 1 ? '' : 's'} · ${c.yesLabel} / ${c.noLabel}`
+    }
+    case 'randomsplit': {
+      const c = config as ConfigByKind['randomsplit']
+      return `${c.paths.length} paths · ${c.paths.map(p => p.weight + '%').join(' / ')}`
+    }
+    case 'delay': {
+      const c = config as ConfigByKind['delay']
+      return `Wait ${c.amount} ${c.unit.toLowerCase()}${c.respectDnd ? ' · Respects DND' : ''}`
+    }
+    case 'setattr': {
+      const c = config as ConfigByKind['setattr']
+      return c.attribute ? `${c.attribute} = ${c.value || '—'}` : 'No attribute'
+    }
+    case 'segment': {
+      const c = config as ConfigByKind['segment']
+      return c.segment ? `${c.action === 'add' ? 'Add to' : 'Remove from'} ${c.segment}` : 'No segment'
+    }
+    case 'jump': {
+      const c = config as ConfigByKind['jump']
+      return c.targetId ? 'Jumps to a node' : 'No target'
+    }
+    default:
+      return NODE_TYPES[kind].description
+  }
+}
+
+/* output branches (extra source handles) for branching nodes */
+export function branchesFor(kind: NodeKind, config: JourneyNodeConfig): Branch[] {
+  if (kind === 'cond') {
+    const c = config as ConfigByKind['cond']
+    return [
+      { id: 'yes', label: c.yesLabel, tone: 'yes' },
+      { id: 'no', label: c.noLabel, tone: 'no' },
+    ]
+  }
+  if (kind === 'randomsplit') {
+    const c = config as ConfigByKind['randomsplit']
+    return c.paths.map(p => ({ id: p.id, label: `${p.weight}%`, tone: 'neutral' as const }))
+  }
+  return []
 }

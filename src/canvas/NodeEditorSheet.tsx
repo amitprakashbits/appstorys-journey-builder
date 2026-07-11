@@ -1,6 +1,7 @@
 import { useMemo, useState } from 'react'
-import { NODE_KINDS, summarize } from './registry'
+import { NODE_TYPES, summarize } from './registry'
 import { NODE_EDITORS } from './editors'
+import { NodeGlyph } from './icons'
 import type { JourneyNode, JourneyNodeConfig, JourneyNodeData } from './types'
 
 type EditorComponent = (props: { config: JourneyNodeConfig; onChange: (c: JourneyNodeConfig) => void }) => JSX.Element
@@ -13,7 +14,7 @@ interface NodeEditorSheetProps {
 }
 
 export function NodeEditorSheet({ node, onSave, onClose, onSendTest }: NodeEditorSheetProps) {
-  const def = NODE_KINDS[node.data.kind]
+  const def = NODE_TYPES[node.data.kind]
   const [title, setTitle] = useState(node.data.title)
   const [config, setConfig] = useState<JourneyNodeConfig>(node.data.config)
   const [confirming, setConfirming] = useState(false)
@@ -23,31 +24,28 @@ export function NodeEditorSheet({ node, onSave, onClose, onSendTest }: NodeEdito
     [title, config, node.data],
   )
 
-  const Editor = NODE_EDITORS[config.kind] as EditorComponent
+  const Editor = NODE_EDITORS[node.data.kind] as EditorComponent
 
   const requestClose = () => {
     if (dirty) setConfirming(true)
     else onClose()
   }
   const save = () => {
-    onSave({ title, config, meta: summarize(config) })
+    onSave({ title, config, meta: summarize(node.data.kind, config) })
     onClose()
   }
 
   return (
     <div className="sheet-scrim" onMouseDown={requestClose}>
-      <aside className="sheet node-sheet" onMouseDown={e => e.stopPropagation()} role="dialog" aria-label={`Edit ${def.label}`}>
+      <aside className="sheet node-sheet" onMouseDown={e => e.stopPropagation()} role="dialog" aria-label={`Edit ${def.name}`}>
         <header className="sheet-head">
-          <span className="sheet-kind-dot" style={{ background: def.color }} />
+          <span className="sheet-kind-icon" style={{ color: def.color, background: `${def.color}18` }}>
+            <NodeGlyph kind={node.data.kind} size={18} />
+          </span>
           <div className="sheet-head-main">
-            <input
-              className="sheet-title-input"
-              value={title}
-              aria-label="Node title"
-              onChange={e => setTitle(e.target.value)}
-            />
+            <input className="sheet-title-input" value={title} aria-label="Node title" onChange={e => setTitle(e.target.value)} />
             <span className="sheet-kind-label" style={{ color: def.color }}>
-              {def.label}
+              {def.name}
             </span>
           </div>
           <span className="status">DRAFT</span>

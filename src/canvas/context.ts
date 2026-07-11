@@ -9,8 +9,8 @@ export interface CanvasContextValue {
   onDuplicateNode: (id: string) => void
   onTestNode: (id: string) => void
   onDeleteNode: (id: string) => void
-  /* edge midpoint "+" — opens the palette anchored at a screen point */
-  onInsertOnEdge: (edgeId: string, clientX: number, clientY: number) => void
+  /* edge midpoint "+" — opens the palette to insert on this edge */
+  onInsertOnEdge: (edgeId: string) => void
 }
 
 const noop = () => {}

@@ -11,7 +11,7 @@ import ReactFlow, {
 import type { Connection, EdgeTypes, NodeTypes, ReactFlowInstance, XYPosition } from 'reactflow'
 import 'reactflow/dist/style.css'
 import type { AudienceMode, EventCondition, ExitCondition, TriggerType } from '../types'
-import { NODE_KINDS } from './registry'
+import { NODE_TYPES, branchesFor } from './registry'
 import { useJourneyGraph } from './useJourneyGraph'
 import { JourneyNodeView } from './nodes/JourneyNodeView'
 import { JourneyEdgeView } from './edges/JourneyEdgeView'
@@ -46,9 +46,9 @@ type CanvasProps = {
 }
 
 type PaletteState =
-  | { mode: 'free'; x: number; y: number; flow: XYPosition }
-  | { mode: 'edge'; x: number; y: number; edgeId: string }
-  | { mode: 'connect'; x: number; y: number; flow: XYPosition; source: string; sourceHandle: string | null }
+  | { mode: 'free'; flow: XYPosition }
+  | { mode: 'edge'; edgeId: string }
+  | { mode: 'connect'; flow: XYPosition; source: string; sourceHandle: string | null }
   | null
 
 function prefersReducedMotion() {
@@ -80,11 +80,6 @@ function CanvasInner(props: CanvasProps) {
   }, [props.triggerType, props.eventConds, props.exitConds])
 
   /* screen (client) point → coords inside the canvas shell, for popovers */
-  const toShell = useCallback((clientX: number, clientY: number) => {
-    const r = shellRef.current?.getBoundingClientRect()
-    return { x: clientX - (r?.left ?? 0), y: clientY - (r?.top ?? 0) }
-  }, [])
-
   /* ── connection handling ─────────────────────────────────────── */
   const onConnect = useCallback(
     (c: Connection) => {
@@ -111,8 +106,7 @@ function CanvasInner(props: CanvasProps) {
       if (onPane) {
         // dropped on empty canvas → open palette, then create node + connection
         const flow = screenToFlowPosition({ x: clientX, y: clientY })
-        const s = toShell(clientX, clientY)
-        setPalette({ mode: 'connect', x: s.x, y: s.y, flow, source: pending.source, sourceHandle: pending.sourceHandle })
+        setPalette({ mode: 'connect', flow, source: pending.source, sourceHandle: pending.sourceHandle })
         return
       }
       // dropped on a handle/node that RF rejected as invalid → explain why
@@ -137,7 +131,7 @@ function CanvasInner(props: CanvasProps) {
         }
       }
     },
-    [screenToFlowPosition, toShell, g, props],
+    [screenToFlowPosition, g, props],
   )
 
   /* ── palette drag-and-drop onto canvas / edges ───────────────── */
@@ -153,15 +147,15 @@ function CanvasInner(props: CanvasProps) {
   const onDrop = useCallback(
     (e: React.DragEvent) => {
       const kind = e.dataTransfer.getData(DND_MIME) as NodeKind
-      if (!kind || !NODE_KINDS[kind]) return
+      if (!kind || !NODE_TYPES[kind]) return
       e.preventDefault()
       if (dropEdgeId) {
         g.insertOnEdge(dropEdgeId, kind)
-        props.toast(`${NODE_KINDS[kind].label} inserted`)
+        props.toast(`${NODE_TYPES[kind].name} inserted`)
       } else {
         const flow = screenToFlowPosition({ x: e.clientX, y: e.clientY })
         g.addNode(kind, flow)
-        props.toast(`${NODE_KINDS[kind].label} added`)
+        props.toast(`${NODE_TYPES[kind].name} added`)
       }
       setDropEdgeId(null)
     },
@@ -171,32 +165,24 @@ function CanvasInner(props: CanvasProps) {
   /* ── palette open helpers ────────────────────────────────────── */
   const openEmptyPalette = useCallback(() => {
     const r = shellRef.current?.getBoundingClientRect()
-    const cx = (r?.width ?? 600) / 2
-    const cy = (r?.height ?? 400) / 2
-    const flow = screenToFlowPosition({ x: (r?.left ?? 0) + cx, y: (r?.top ?? 0) + cy })
-    setPalette({ mode: 'free', x: cx - 100, y: cy - 40, flow })
+    const flow = screenToFlowPosition({ x: (r?.left ?? 0) + (r?.width ?? 600) / 2, y: (r?.top ?? 0) + (r?.height ?? 400) / 2 })
+    setPalette({ mode: 'free', flow })
   }, [screenToFlowPosition])
 
-  const onInsertOnEdge = useCallback(
-    (edgeId: string, clientX: number, clientY: number) => {
-      const s = toShell(clientX, clientY)
-      setPalette({ mode: 'edge', x: s.x, y: s.y, edgeId })
-    },
-    [toShell],
-  )
+  const onInsertOnEdge = useCallback((edgeId: string) => setPalette({ mode: 'edge', edgeId }), [])
 
   const onPalettePick = useCallback(
     (kind: NodeKind) => {
       if (!palette) return
       if (palette.mode === 'free') {
         g.addNode(kind, palette.flow)
-        props.toast(`${NODE_KINDS[kind].label} added`)
+        props.toast(`${NODE_TYPES[kind].name} added`)
       } else if (palette.mode === 'edge') {
         g.insertOnEdge(palette.edgeId, kind)
-        props.toast(`${NODE_KINDS[kind].label} inserted`)
+        props.toast(`${NODE_TYPES[kind].name} inserted`)
       } else {
         g.addNodeWithConnection(kind, palette.flow, palette.source, palette.sourceHandle)
-        props.toast(`${NODE_KINDS[kind].label} connected`)
+        props.toast(`${NODE_TYPES[kind].name} connected`)
       }
       setPalette(null)
     },
@@ -265,11 +251,12 @@ function CanvasInner(props: CanvasProps) {
       props.toast('Entry trigger is missing an event — pick one in step 2', 'err')
       return
     }
-    const orphan = g.nodes.find(
-      n => n.data.kind === 'cond' && !['yes', 'no'].every(h => g.edges.some(e => e.source === n.id && e.sourceHandle === h)),
-    )
+    const orphan = g.nodes.find(n => {
+      const branches = branchesFor(n.data.kind, n.data.config)
+      return branches.length > 0 && !branches.every(b => g.edges.some(e => e.source === n.id && e.sourceHandle === b.id))
+    })
     if (orphan) {
-      props.toast(`Condition “${orphan.data.title}” has an unconnected YES/NO branch`, 'err')
+      props.toast(`“${orphan.data.title}” has an unconnected branch`, 'err')
       return
     }
     setLive(true)
@@ -362,7 +349,7 @@ function CanvasInner(props: CanvasProps) {
                 pannable
                 zoomable
                 className="journey-minimap"
-                nodeColor={(n) => NODE_KINDS[(n.data as JourneyNodeData).kind].color}
+                nodeColor={(n) => NODE_TYPES[(n.data as JourneyNodeData).kind].color}
                 nodeStrokeWidth={0}
                 maskColor="rgba(251,101,20,0.06)"
               />
@@ -427,7 +414,7 @@ function CanvasInner(props: CanvasProps) {
           {showHelp && <ShortcutsPopover onClose={() => setShowHelp(false)} />}
         </div>
 
-        {palette && <NodePalette x={palette.x} y={palette.y} onPick={onPalettePick} onClose={() => setPalette(null)} />}
+        {palette && <NodePalette onPick={onPalettePick} onClose={() => setPalette(null)} />}
 
         {editingNode && (
           <NodeEditorSheet

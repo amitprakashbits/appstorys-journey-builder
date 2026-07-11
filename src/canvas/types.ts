@@ -1,45 +1,95 @@
 import type { Edge, Node } from 'reactflow'
 
 /* ── node kinds ──────────────────────────────────────────────────
-   Adding a kind: extend NodeKind, add a config variant below, and add a
-   NODE_KINDS entry in registry.ts. The switch in makeDefaultConfig() and any
-   `kind`-exhaustive code then fails to compile until the new kind is handled. */
-export type NodeKind = 'story' | 'push' | 'cond' | 'delay'
+   Every kind has: a config shape (ConfigByKind), a registry entry
+   (registry.ts), an icon (icons.tsx) and an editor (editors/). Adding a kind
+   without all four is a compile error via the exhaustive maps/switches. */
+export type NodeKind =
+  // Campaigns — in-app messaging
+  | 'animations'
+  | 'bottomsheet'
+  | 'carousel'
+  | 'spotlight'
+  | 'floater'
+  | 'gamification'
+  | 'modal'
+  | 'pagepop'
+  | 'pinnedbanner'
+  | 'tooltip'
+  | 'video'
+  | 'widgets'
+  // Messages
+  | 'push'
+  | 'whatsapp'
+  | 'email'
+  | 'sms'
+  // Branching
+  | 'cond'
+  | 'randomsplit'
+  // Delay
+  | 'delay'
+  // Data
+  | 'setattr'
+  | 'segment'
+  // Flow control
+  | 'jump'
 
-export interface StoryConfig {
-  kind: 'story'
-  campaignId: string | null
-  campaignName: string
-}
-export interface PushConfig {
-  kind: 'push'
-  title: string
-  body: string
-  priority: 'high' | 'normal'
-  deepLink: string
-}
+export type NodeFamily = 'campaign' | 'message' | 'branching' | 'delay' | 'data' | 'flow'
+
+/* shared building blocks */
 export interface CondRow {
   id: string
   property: string
   operator: string
   value: string
 }
-export interface CondConfig {
-  kind: 'cond'
-  rows: CondRow[]
-  yesLabel: string
-  noLabel: string
+export interface SplitPath {
+  id: string
+  label: string
+  weight: number
 }
-export interface DelayConfig {
-  kind: 'delay'
-  amount: number
-  unit: 'Minutes' | 'Hours' | 'Days'
-  respectDnd: boolean
+/* Campaign types are "create a new campaign of this type, or import an existing
+   one"; content is edited in the campaign flow (handoff). */
+export interface CampaignBase {
+  source: 'create' | 'import'
+  campaignId: string | null
+  campaignName: string
 }
-export type JourneyNodeConfig = StoryConfig | PushConfig | CondConfig | DelayConfig
 
-/* Data carried by every canvas node. `isEntry` is derived at render time from
-   the graph's entry id, not stored here. */
+/* ── per-kind config shapes ──────────────────────────────────── */
+export interface ConfigByKind {
+  animations: CampaignBase & { loop: boolean }
+  bottomsheet: CampaignBase & { height: 'half' | 'full'; dismissible: boolean }
+  carousel: CampaignBase & { cards: number; autoplay: boolean }
+  spotlight: CampaignBase & { anchor: string; style: 'pulse' | 'ring' }
+  floater: CampaignBase & { position: 'br' | 'bl'; label: string }
+  gamification: CampaignBase & { game: 'spin' | 'scratch' | 'slot'; reward: string }
+  modal: CampaignBase & { size: 'sm' | 'md' | 'lg'; dismissible: boolean }
+  pagepop: CampaignBase & { dismissible: boolean }
+  pinnedbanner: CampaignBase & { position: 'top' | 'bottom'; dismissible: boolean }
+  tooltip: CampaignBase & { anchor: string; placement: 'top' | 'bottom' | 'left' | 'right' }
+  video: CampaignBase & { url: string; autoplay: boolean }
+  widgets: CampaignBase & { widgetId: string }
+
+  push: { title: string; body: string; deepLink: string; priority: 'high' | 'normal' }
+  whatsapp: { templateId: string; phoneField: string; params: string }
+  email: { subject: string; templateId: string; fromName: string }
+  sms: { body: string; senderId: string }
+
+  cond: { rows: CondRow[]; yesLabel: string; noLabel: string }
+  randomsplit: { paths: SplitPath[] }
+
+  delay: { amount: number; unit: 'Minutes' | 'Hours' | 'Days'; respectDnd: boolean }
+
+  setattr: { attribute: string; value: string }
+  segment: { action: 'add' | 'remove'; segment: string }
+
+  jump: { targetId: string | null }
+}
+
+export type NodeConfig<K extends NodeKind = NodeKind> = ConfigByKind[K]
+export type JourneyNodeConfig = ConfigByKind[NodeKind]
+
 export interface JourneyNodeData {
   kind: NodeKind
   title: string
@@ -47,19 +97,22 @@ export interface JourneyNodeData {
   config: JourneyNodeConfig
 }
 
-/* React Flow node/edge specialised to our data. Position lives on the RF node
-   (`node.position`) — that is the persisted spatial layout. */
 export type JourneyNode = Node<JourneyNodeData, 'journey'>
 
 export interface JourneyEdgeData {
-  /* for Condition sources: which branch this edge leaves from */
-  branch?: 'yes' | 'no'
+  branch?: string
 }
 export type JourneyEdge = Edge<JourneyEdgeData>
 
-/* Snapshot the history stack stores. */
 export interface GraphSnapshot {
   nodes: JourneyNode[]
   edges: JourneyEdge[]
   entryId: string | null
+}
+
+/* an output branch (source handle) on a node */
+export interface Branch {
+  id: string
+  label: string
+  tone: 'yes' | 'no' | 'neutral'
 }

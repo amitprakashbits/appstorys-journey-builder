@@ -1,7 +1,7 @@
 import { useCallback, useRef, useState } from 'react'
 import { applyEdgeChanges, applyNodeChanges, updateEdge } from 'reactflow'
 import type { Connection, EdgeChange, NodeChange, XYPosition } from 'reactflow'
-import { NODE_KINDS, makeDefaultConfig } from './registry'
+import { NODE_TYPES, makeDefaultConfig, summarize } from './registry'
 import type { GraphSnapshot, JourneyEdge, JourneyNode, NodeKind } from './types'
 
 const HISTORY_LIMIT = 50
@@ -11,12 +11,13 @@ const nid = () => `n${++seq}`
 const eid = () => `e${++seq}`
 
 function makeNode(kind: NodeKind, position: XYPosition): JourneyNode {
-  const def = NODE_KINDS[kind]
+  const def = NODE_TYPES[kind]
+  const config = makeDefaultConfig(kind)
   return {
     id: nid(),
     type: 'journey',
     position,
-    data: { kind, title: def.defaultTitle, meta: def.defaultMeta, config: makeDefaultConfig(kind) },
+    data: { kind, title: def.defaultTitle, meta: summarize(kind, config), config },
   }
 }
 

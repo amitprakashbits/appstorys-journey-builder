@@ -41,8 +41,10 @@ Node 18+ recommended.
   Nodes are draggable cards placed anywhere; connect by dragging from a node's
   right-edge port to another node's left port (drop on empty canvas to add +
   connect in one go); hover any edge for a midpoint "+" to insert inline; drag
-  palette rows onto the canvas or onto an edge. Condition nodes fork into
-  YES/NO branches. Entry trigger shows as a badge on the first node — no
+  palette rows onto the canvas or onto an edge. The "Add to journey" palette is
+  a searchable, categorized picker of 22 node types across 6 families
+  (Campaigns · Messages · Branching · Delay · Data · Flow control), each with a
+  bespoke editor. Condition and Random-split nodes fork into branches. Entry trigger shows as a badge on the first node — no
   Start/End nodes. Bottom toolbar (zoom / fit / snap / tidy-up / undo-redo),
   restyled minimap, full keyboard layer (delete, ⌘D duplicate, ⌘Z/⇧⌘Z
   undo-redo, ⌘A select-all, arrow-nudge), and publish validation (≥1 node,
