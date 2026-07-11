@@ -11,6 +11,19 @@ const ALL_KINDS = FAMILY_ORDER.flatMap(f => KINDS_BY_FAMILY[f])
 const FAMILY_ICON: Record<NodeFamily, JSX.Element> = {
   campaign: <path d="M4 9v6h3l6 4V5L7 9H4zM17 8a5 5 0 010 8" />,
   message: <path d="M4 5h16a1 1 0 011 1v9a1 1 0 01-1 1H9l-4 4v-4H4a1 1 0 01-1-1V6a1 1 0 011-1z" />,
+  action: <path d="M12 3l9 9-9 9-9-9 9-9z" />,
+  ai: (
+    <>
+      <path d="M9 18a4 4 0 01-2-7.5A3.5 3.5 0 0110 6a3 3 0 015 1 3.5 3.5 0 011.5 6.5A3.5 3.5 0 0113 18z" />
+      <path d="M12 8v8" />
+    </>
+  ),
+  usercond: (
+    <>
+      <circle cx="9" cy="8" r="3" />
+      <path d="M3.5 19c.6-3.2 2.9-4.6 5.5-4.6 1 0 1.9.2 2.7.6M14.5 17l1.7 1.7 3-3.4" />
+    </>
+  ),
   branching: (
     <>
       <circle cx="6" cy="6" r="2" />

@@ -13,6 +13,9 @@ export interface NodeTypeDef {
 export const FAMILY_COLOR: Record<NodeFamily, string> = {
   campaign: '#FB6514',
   message: '#3B82F6',
+  action: '#F59E0B',
+  ai: '#8B5CF6',
+  usercond: '#F59E0B',
   branching: '#F59E0B',
   delay: '#6B7280',
   data: '#8B5CF6',
@@ -22,18 +25,21 @@ export const FAMILY_COLOR: Record<NodeFamily, string> = {
 export const FAMILY_LABEL: Record<NodeFamily, string> = {
   campaign: 'Campaigns',
   message: 'Messages',
-  branching: 'Branching',
+  action: 'Action conditions',
+  ai: 'AI tools',
+  usercond: 'User conditions',
+  branching: 'Split user path',
   delay: 'Delay',
   data: 'Data',
   flow: 'Flow control',
 }
 
-const T = (kind: NodeKind, family: NodeFamily, name: string, description: string, defaultTitle: string): NodeTypeDef => ({
+const T = (kind: NodeKind, family: NodeFamily, name: string, description: string, defaultTitle: string, color?: string): NodeTypeDef => ({
   kind,
   family,
   name,
   description,
-  color: FAMILY_COLOR[family],
+  color: color ?? FAMILY_COLOR[family],
   defaultTitle,
 })
 
@@ -56,9 +62,18 @@ export const NODE_TYPES: Record<NodeKind, NodeTypeDef> = {
   whatsapp: T('whatsapp', 'message', 'WhatsApp', 'Message via WhatsApp Business', 'WhatsApp nudge'),
   email: T('email', 'message', 'Email', 'Send a templated email', 'Onboarding email'),
   sms: T('sms', 'message', 'SMS', 'Send a plain text message', 'SMS reminder'),
-  // Branching
-  cond: T('cond', 'branching', 'Conditional branch', 'Route users by an audience filter', 'KYC complete?'),
-  randomsplit: T('randomsplit', 'branching', 'Random split branch', 'Randomly split into weighted paths', 'A/B split'),
+  // Action conditions (message interaction)
+  msg_seen: T('msg_seen', 'action', 'Has seen mobile in-app message', 'Branch on whether the user saw a message', 'Seen in-app message'),
+  msg_clicked: T('msg_clicked', 'action', 'Has clicked mobile in-app message', 'Branch on whether the user clicked a message', 'Clicked in-app message'),
+  msg_closed: T('msg_closed', 'action', 'Has closed mobile in-app message', 'Branch on whether the user closed a message', 'Closed in-app message'),
+  // AI tools
+  path_optimizer: T('path_optimizer', 'ai', 'Intelligent path optimizer', 'Dynamically select user path to maximize engagement', 'Path optimizer'),
+  // User conditions
+  check_attr: T('check_attr', 'usercond', 'Check User Attribute', 'Split users based on their user property', 'Check attribute'),
+  has_done_event: T('has_done_event', 'usercond', 'Has done event', 'Split users based on the event(s) performed', 'Has done event'),
+  // Split user path (branching)
+  cond: T('cond', 'branching', 'Conditional Split', 'Split users into paths based on performed events & properties', 'KYC complete?'),
+  randomsplit: T('randomsplit', 'branching', 'A/B Split', 'Randomly split users into multiple paths for experimentation', 'A/B split', '#8B5CF6'),
   // Delay
   delay: T('delay', 'delay', 'Delay', 'Wait a set time before the next node', 'Wait 24 hours'),
   // Data
@@ -69,7 +84,7 @@ export const NODE_TYPES: Record<NodeKind, NodeTypeDef> = {
 }
 
 /* palette category rail order + membership */
-export const FAMILY_ORDER: NodeFamily[] = ['campaign', 'message', 'branching', 'delay', 'data', 'flow']
+export const FAMILY_ORDER: NodeFamily[] = ['campaign', 'message', 'action', 'ai', 'usercond', 'branching', 'delay', 'data', 'flow']
 export const KINDS_BY_FAMILY: Record<NodeFamily, NodeKind[]> = FAMILY_ORDER.reduce(
   (acc, fam) => {
     acc[fam] = (Object.keys(NODE_TYPES) as NodeKind[]).filter(k => NODE_TYPES[k].family === fam)
@@ -116,6 +131,22 @@ export function makeDefaultConfig(kind: NodeKind): JourneyNodeConfig {
       return { subject: '', templateId: '', fromName: 'Tickertape' }
     case 'sms':
       return { body: '', senderId: 'TICKR' }
+    case 'msg_seen':
+    case 'msg_clicked':
+    case 'msg_closed':
+      return { campaignId: null, campaignName: '', withinValue: 1, withinUnit: 'Days' }
+    case 'path_optimizer':
+      return {
+        objective: 'engagement',
+        arms: [
+          { id: `a${++seq}`, label: 'Path A' },
+          { id: `a${++seq}`, label: 'Path B' },
+        ],
+      }
+    case 'check_attr':
+      return { attribute: '', operator: 'is', value: '' }
+    case 'has_done_event':
+      return { event: 'Select an event', withinValue: 7, withinUnit: 'Days' }
     case 'cond':
       return { rows: [{ id: `r${++seq}`, property: 'KYC status', operator: 'is', value: 'Complete' }], yesLabel: 'YES', noLabel: 'NO' }
     case 'randomsplit':
@@ -155,6 +186,25 @@ export function summarize(kind: NodeKind, config: JourneyNodeConfig): string {
     return c.campaignId ? `${c.source === 'create' ? 'New' : 'Imported'} · ${c.campaignName || NODE_TYPES[kind].name}` : 'Not configured'
   }
   switch (kind) {
+    case 'msg_seen':
+    case 'msg_clicked':
+    case 'msg_closed': {
+      const c = config as ConfigByKind['msg_seen']
+      const verb = kind === 'msg_seen' ? 'Seen' : kind === 'msg_clicked' ? 'Clicked' : 'Closed'
+      return c.campaignId ? `${verb} · within ${c.withinValue} ${c.withinUnit.toLowerCase()}` : 'Pick a message'
+    }
+    case 'path_optimizer': {
+      const c = config as ConfigByKind['path_optimizer']
+      return `${c.arms.length} arms · ${c.objective}`
+    }
+    case 'check_attr': {
+      const c = config as ConfigByKind['check_attr']
+      return c.attribute ? `${c.attribute} ${c.operator} ${c.value || '—'}` : 'No attribute'
+    }
+    case 'has_done_event': {
+      const c = config as ConfigByKind['has_done_event']
+      return c.event && c.event !== 'Select an event' ? c.event : 'No event'
+    }
     case 'push':
       return `${(config as ConfigByKind['push']).priority === 'high' ? 'High' : 'Normal'} priority`
     case 'whatsapp': {
@@ -198,8 +248,20 @@ export function summarize(kind: NodeKind, config: JourneyNodeConfig): string {
   }
 }
 
+const YES_NO: Branch[] = [
+  { id: 'yes', label: 'YES', tone: 'yes' },
+  { id: 'no', label: 'NO', tone: 'no' },
+]
+
 /* output branches (extra source handles) for branching nodes */
 export function branchesFor(kind: NodeKind, config: JourneyNodeConfig): Branch[] {
+  if (kind === 'msg_seen' || kind === 'msg_clicked' || kind === 'msg_closed' || kind === 'check_attr' || kind === 'has_done_event') {
+    return YES_NO
+  }
+  if (kind === 'path_optimizer') {
+    const c = config as ConfigByKind['path_optimizer']
+    return c.arms.map(a => ({ id: a.id, label: a.label, tone: 'neutral' as const }))
+  }
   if (kind === 'cond') {
     const c = config as ConfigByKind['cond']
     return [

@@ -103,6 +103,44 @@ export const NODE_ICONS: Record<NodeKind, ReactNode> = {
       <path d="M8 10h.01M12 10h.01M16 10h.01" />
     </>
   ),
+  msg_seen: (
+    <>
+      <rect x="6" y="3" width="12" height="18" rx="2.5" />
+      <path d="M8.5 12s1.3-2.2 3.5-2.2S15.5 12 15.5 12s-1.3 2.2-3.5 2.2S8.5 12 8.5 12z" />
+      <circle cx="12" cy="12" r="0.8" />
+    </>
+  ),
+  msg_clicked: (
+    <>
+      <rect x="6" y="3" width="12" height="18" rx="2.5" />
+      <path d="M10 9l5 2.5-2 .8-.8 2z" />
+    </>
+  ),
+  msg_closed: (
+    <>
+      <rect x="6" y="3" width="12" height="18" rx="2.5" />
+      <path d="M10 10l4 4M14 10l-4 4" />
+    </>
+  ),
+  path_optimizer: (
+    <>
+      <path d="M9 18a4 4 0 01-2-7.5A3.5 3.5 0 0110 6a3 3 0 015 1 3.5 3.5 0 011.5 6.5A3.5 3.5 0 0113 18z" />
+      <path d="M12 8v8M9.5 11h5" />
+    </>
+  ),
+  check_attr: (
+    <>
+      <circle cx="9" cy="8" r="3" />
+      <path d="M3.5 19c.6-3.2 2.9-4.6 5.5-4.6 1.1 0 2.1.2 3 .7" />
+      <path d="M14.5 17l1.8 1.8 3.2-3.6" />
+    </>
+  ),
+  has_done_event: (
+    <>
+      <path d="M10 10V6a1.5 1.5 0 013 0v5" />
+      <path d="M13 9.5a1.4 1.4 0 012.6 0M15.6 10a1.4 1.4 0 012.4 1v3a5 5 0 01-5 5h-1.6a4 4 0 01-2.9-1.3L7 14.8a1.4 1.4 0 012-2l1 1" />
+    </>
+  ),
   cond: (
     <>
       <path d="M6 4v6a3 3 0 003 3h6" />

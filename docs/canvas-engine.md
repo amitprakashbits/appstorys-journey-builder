@@ -63,13 +63,16 @@ App.tsx ──props──▶ Canvas.tsx ──▶ JourneyCanvas (ReactFlowProvid
 
 ## Node catalog
 
-22 types across 6 families, all driven off the registry:
+28 types across 9 families, all driven off the registry:
 
 - **Campaigns** (in-app messaging, 12): Animations, Bottom Sheet, Carousel,
   Element Spotlight, Floater, Gamification, Modal, Page Pop, Pinned Banner,
   Tooltip, Video, Widgets
 - **Messages** (4): Push Notification, WhatsApp, Email, SMS
-- **Branching** (2): Conditional branch (YES/NO), Random split branch (weighted paths)
+- **Action conditions** (3, YES/NO): Has seen / clicked / closed mobile in-app message
+- **AI tools** (1): Intelligent path optimizer (routes to the best of N arms)
+- **User conditions** (2, YES/NO): Check User Attribute, Has done event
+- **Split user path** (2): Conditional Split (YES/NO), A/B Split (weighted paths)
 - **Delay** (1): Delay · **Data** (2): Update Backend Attribute, Add/update a Live Segment
 - **Flow control** (1): Jump / Go to node
 

@@ -23,7 +23,16 @@ export type NodeKind =
   | 'whatsapp'
   | 'email'
   | 'sms'
-  // Branching
+  // Action conditions (message interaction)
+  | 'msg_seen'
+  | 'msg_clicked'
+  | 'msg_closed'
+  // AI tools
+  | 'path_optimizer'
+  // User conditions
+  | 'check_attr'
+  | 'has_done_event'
+  // Split user path (branching)
   | 'cond'
   | 'randomsplit'
   // Delay
@@ -34,7 +43,7 @@ export type NodeKind =
   // Flow control
   | 'jump'
 
-export type NodeFamily = 'campaign' | 'message' | 'branching' | 'delay' | 'data' | 'flow'
+export type NodeFamily = 'campaign' | 'message' | 'action' | 'ai' | 'usercond' | 'branching' | 'delay' | 'data' | 'flow'
 
 /* shared building blocks */
 export interface CondRow {
@@ -47,6 +56,18 @@ export interface SplitPath {
   id: string
   label: string
   weight: number
+}
+export interface OptArm {
+  id: string
+  label: string
+}
+export type WithinUnit = 'Minutes' | 'Hours' | 'Days'
+/* "has [seen|clicked|closed] this in-app message within N units" → yes/no */
+export interface MsgCondConfig {
+  campaignId: string | null
+  campaignName: string
+  withinValue: number
+  withinUnit: WithinUnit
 }
 /* Campaign types are "create a new campaign of this type, or import an existing
    one"; content is edited in the campaign flow (handoff). */
@@ -75,6 +96,15 @@ export interface ConfigByKind {
   whatsapp: { templateId: string; phoneField: string; params: string }
   email: { subject: string; templateId: string; fromName: string }
   sms: { body: string; senderId: string }
+
+  msg_seen: MsgCondConfig
+  msg_clicked: MsgCondConfig
+  msg_closed: MsgCondConfig
+
+  path_optimizer: { objective: 'engagement' | 'conversion' | 'retention'; arms: OptArm[] }
+
+  check_attr: { attribute: string; operator: string; value: string }
+  has_done_event: { event: string; withinValue: number; withinUnit: WithinUnit }
 
   cond: { rows: CondRow[]; yesLabel: string; noLabel: string }
   randomsplit: { paths: SplitPath[] }

@@ -1,8 +1,9 @@
 import type { ReactNode } from 'react'
 import { PillGroup, Toggle } from '../../components/ui'
+import { EventPicker } from '../../components/EventPicker'
 import { newCondRow, newSplitPath } from '../registry'
 import { useEditorEnv } from './env'
-import type { CampaignBase, ConfigByKind, NodeKind } from '../types'
+import type { CampaignBase, ConfigByKind, MsgCondConfig, NodeKind, OptArm } from '../types'
 
 export type EditorFor<K extends NodeKind> = (props: {
   config: ConfigByKind[K]
@@ -354,6 +355,85 @@ const JumpEditor: EditorFor<'jump'> = ({ config, onChange }) => {
   )
 }
 
+/* ── action conditions (message interaction) — shared editor ──── */
+const WithinRow = (p: { value: number; unit: MsgCondConfig['withinUnit']; onValue: (v: number) => void; onUnit: (u: MsgCondConfig['withinUnit']) => void }) => (
+  <Field label="Within">
+    <div className="time-group">
+      <input className="text-input input-sm" type="number" min={1} style={{ width: 80, minWidth: 0 }} value={p.value} onChange={e => p.onValue(Math.max(1, Number(e.target.value) || 1))} />
+      <select className="select input-sm" style={{ width: 110, minWidth: 0 }} value={p.unit} onChange={e => p.onUnit(e.target.value as MsgCondConfig['withinUnit'])}>
+        <option>Minutes</option>
+        <option>Hours</option>
+        <option>Days</option>
+      </select>
+    </div>
+  </Field>
+)
+const MsgConditionEditor = ({ config, onChange }: { config: MsgCondConfig; onChange: (c: MsgCondConfig) => void }) => (
+  <div className="editor-form">
+    <Field label="In-app message">
+      <select
+        className="select input-md"
+        value={config.campaignId ?? ''}
+        onChange={e => {
+          const c = CAMPAIGNS.find(x => x.id === e.target.value)
+          onChange({ ...config, campaignId: c?.id ?? null, campaignName: c?.name ?? '' })
+        }}
+      >
+        <option value="">Select a message…</option>
+        {CAMPAIGNS.map(c => (
+          <option key={c.id} value={c.id}>
+            {c.name}
+          </option>
+        ))}
+      </select>
+    </Field>
+    <WithinRow value={config.withinValue} unit={config.withinUnit} onValue={withinValue => onChange({ ...config, withinValue })} onUnit={withinUnit => onChange({ ...config, withinUnit })} />
+    <p className="editor-hint">Users who match take the YES branch; everyone else takes NO.</p>
+  </div>
+)
+
+/* ── AI tools ─────────────────────────────────────────────────── */
+const PathOptimizerEditor: EditorFor<'path_optimizer'> = ({ config, onChange }) => {
+  const setArm = (id: string, label: string) => onChange({ ...config, arms: config.arms.map(a => (a.id === id ? { ...a, label } : a)) })
+  return (
+    <div className="editor-form">
+      <SelectField label="Optimize for" value={config.objective} options={['engagement', 'conversion', 'retention']} onChange={v => onChange({ ...config, objective: v as ConfigByKind['path_optimizer']['objective'] })} />
+      <label className="field-label">Candidate paths</label>
+      {config.arms.map(a => (
+        <div className="cond-row" key={a.id}>
+          <input className="text-input input-sm" style={{ minWidth: 0, flex: 1 }} value={a.label} onChange={e => setArm(a.id, e.target.value)} />
+          <button className="x" aria-label="Remove path" onClick={() => config.arms.length > 2 && onChange({ ...config, arms: config.arms.filter(x => x.id !== a.id) })}>
+            ✕
+          </button>
+        </div>
+      ))}
+      <button className="add-link sm" onClick={() => onChange({ ...config, arms: [...config.arms, { id: `a${Date.now() % 100000}`, label: 'New path' } as OptArm] })}>
+        ＋ Add path
+      </button>
+      <p className="editor-hint">The model routes each user to the arm most likely to hit your objective.</p>
+    </div>
+  )
+}
+
+/* ── user conditions ──────────────────────────────────────────── */
+const CheckAttrEditor: EditorFor<'check_attr'> = ({ config, onChange }) => (
+  <div className="editor-form">
+    <SelectField label="Attribute" value={config.attribute} options={ATTRS} placeholder="Select an attribute…" onChange={attribute => onChange({ ...config, attribute })} />
+    <SelectField label="Operator" value={config.operator} options={OPERATORS} onChange={operator => onChange({ ...config, operator })} />
+    <TextField label="Value" value={config.value} placeholder="e.g. Complete" onChange={value => onChange({ ...config, value })} />
+    <p className="editor-hint">Matching users take YES; the rest take NO.</p>
+  </div>
+)
+const HasDoneEventEditor: EditorFor<'has_done_event'> = ({ config, onChange }) => (
+  <div className="editor-form">
+    <Field label="Event">
+      <EventPicker value={config.event} onChange={event => onChange({ ...config, event })} />
+    </Field>
+    <WithinRow value={config.withinValue} unit={config.withinUnit} onValue={withinValue => onChange({ ...config, withinValue })} onUnit={withinUnit => onChange({ ...config, withinUnit })} />
+    <p className="editor-hint">Users who performed the event take YES; the rest take NO.</p>
+  </div>
+)
+
 /* ── registry — exhaustive: a missing kind is a compile error ──── */
 export const NODE_EDITORS: { [K in NodeKind]: EditorFor<K> } = {
   animations: AnimationsEditor,
@@ -372,6 +452,12 @@ export const NODE_EDITORS: { [K in NodeKind]: EditorFor<K> } = {
   whatsapp: WhatsAppEditor,
   email: EmailEditor,
   sms: SmsEditor,
+  msg_seen: MsgConditionEditor,
+  msg_clicked: MsgConditionEditor,
+  msg_closed: MsgConditionEditor,
+  path_optimizer: PathOptimizerEditor,
+  check_attr: CheckAttrEditor,
+  has_done_event: HasDoneEventEditor,
   cond: CondEditor,
   randomsplit: RandomSplitEditor,
   delay: DelayEditor,
