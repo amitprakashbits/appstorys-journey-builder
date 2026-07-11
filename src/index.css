@@ -358,6 +358,9 @@ input[type='range'] { accent-color: var(--brand); width: 220px; }
 .cbtn:hover { background: var(--cream); color: var(--tx); }
 .cbtn svg { stroke: currentColor; }
 .cbtn.on { background: var(--cream); color: var(--brand); }
+.cbtn.add { color: var(--brand); font-size: 12.5px; font-weight: 600; padding: 0 12px; gap: 5px; }
+.cbtn.add .plus { font-size: 15px; }
+.cbtn.add:hover { background: var(--cream); }
 .cbtn:disabled { opacity: 0.35; pointer-events: none; }
 .cbar-zoom { font-size: 11.5px; font-weight: 600; color: var(--tx3); min-width: 38px; text-align: center; font-variant-numeric: tabular-nums; }
 .cbar-sep { width: 1px; align-self: stretch; background: var(--line); margin: 2px 3px; }

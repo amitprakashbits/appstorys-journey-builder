@@ -377,6 +377,10 @@ function CanvasInner(props: CanvasProps) {
 
         {/* bottom-center floating toolbar */}
         <div className="canvas-bottom-bar">
+          <button className="cbtn add" onClick={openEmptyPalette} aria-label="Add step" title="Add a step">
+            <span className="plus">＋</span> Add step
+          </button>
+          <span className="cbar-sep" />
           <button className="cbtn" onClick={() => zoomOut()} aria-label="Zoom out" title="Zoom out">
             −
           </button>
