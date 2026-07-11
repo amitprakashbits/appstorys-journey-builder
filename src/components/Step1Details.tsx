@@ -1,14 +1,7 @@
 import React, { useState } from 'react'
 import { Card } from './ui'
+import { EventPicker } from './EventPicker'
 import type { Goal } from '../types'
-
-const GOAL_EVENTS = [
-  'Select an event',
-  'US_Stocks_Account_Opened',
-  'First_Investment_Complete',
-  'Subscription_Purchased',
-  'SIP_Mandate_Created',
-]
 
 let goalSeq = 0
 
@@ -94,11 +87,7 @@ export default function Step1Details(props: {
             </div>
             <div>
               <label className="field-label">Goal event</label>
-              <select className="select" value={g.event} onChange={e => updateGoal(g.id, { event: e.target.value })}>
-                {GOAL_EVENTS.map(ev => (
-                  <option key={ev}>{ev}</option>
-                ))}
-              </select>
+              <EventPicker value={g.event} onChange={name => updateGoal(g.id, { event: name })} />
             </div>
             <div>
               <label className="field-label">Attribution window</label>

@@ -1,19 +1,8 @@
 import React, { useMemo, useState } from 'react'
 import { Card, ToggleRow } from './ui'
+import { SegmentSelect } from './SegmentSelect'
 import type { AudienceMode, Rule } from '../types'
 
-const SEGMENTS = [
-  { name: 'US Stocks — RFI pending', count: '41.2K' },
-  { name: 'KYC complete', count: '2.1M' },
-  { name: 'SIP investors', count: '684K' },
-  { name: 'Dormant 30d', count: '1.3M' },
-  { name: 'Pro subscribers', count: '96K' },
-  { name: 'Watchlist power users', count: '212K' },
-]
-const EXCLUDE_SEGMENTS = [
-  { name: 'Internal test accounts', count: '1.8K' },
-  { name: 'Churned — uninstalled', count: '420K' },
-]
 const PROPERTIES = ['KYC status', 'Platform', 'App version', 'Portfolio value', 'Last active']
 const OPERATORS = ['is', 'is not', 'greater than', 'less than']
 
@@ -25,17 +14,17 @@ export default function Step3Audience(props: {
   setAudMode: (m: AudienceMode) => void
   toast: (m: string, k?: 'ok' | 'err') => void
 }) {
-  const [selectedSegs, setSelectedSegs] = useState<Set<number>>(new Set([0]))
+  const [selectedSegs, setSelectedSegs] = useState<string[]>(['s-rfi'])
   const [rules, setRules] = useState<Rule[]>([{ id: ++ruleSeq, property: 'KYC status', operator: 'is', value: 'Complete' }])
   const [exclude, setExclude] = useState(false)
-  const [excludeSegs, setExcludeSegs] = useState<Set<number>>(new Set([0]))
+  const [excludeSegs, setExcludeSegs] = useState<string[]>([])
   const [control, setControl] = useState(false)
   const [controlPct, setControlPct] = useState(10)
 
   const reach = useMemo(() => {
     let m = BASE
     if (props.audMode === 'seg') {
-      const n = selectedSegs.size
+      const n = selectedSegs.length
       m = n === 0 ? 0 : Math.min(BASE, n * 0.62 + 0.04)
     } else if (props.audMode === 'rules') {
       m = BASE * Math.pow(0.44, rules.length)
@@ -44,13 +33,6 @@ export default function Step3Audience(props: {
     const pct = Math.round((m / BASE) * 100)
     return { m, pct }
   }, [props.audMode, selectedSegs, rules, exclude])
-
-  const toggleSeg = (i: number, set: Set<number>, setter: (s: Set<number>) => void) => {
-    const next = new Set(set)
-    if (next.has(i)) next.delete(i)
-    else next.add(i)
-    setter(next)
-  }
 
   const cards: { id: AudienceMode; title: string; sub: string }[] = [
     { id: 'all', title: 'All users', sub: 'Anyone who meets the entry trigger enters the journey.' },
@@ -89,18 +71,8 @@ export default function Step3Audience(props: {
 
           {props.audMode === 'seg' && (
             <div className="aud-panel">
-              <label className="field-label">Include users in any of these segments</label>
-              <div className="seg-chips">
-                {SEGMENTS.map((s, i) => (
-                  <button
-                    key={s.name}
-                    className={`seg-chip ${selectedSegs.has(i) ? 'on' : ''}`}
-                    onClick={() => toggleSeg(i, selectedSegs, setSelectedSegs)}
-                  >
-                    {s.name} <span className="cnt">{s.count}</span>
-                  </button>
-                ))}
-              </div>
+              <label className="field-label">Include users in any of these cohorts</label>
+              <SegmentSelect selectedIds={selectedSegs} onChange={setSelectedSegs} addLabel="Add cohort" />
             </div>
           )}
 
@@ -170,17 +142,7 @@ export default function Step3Audience(props: {
             onChange={setExclude}
             style={{ marginBottom: 18 }}
           >
-            <div className="seg-chips">
-              {EXCLUDE_SEGMENTS.map((s, i) => (
-                <button
-                  key={s.name}
-                  className={`seg-chip ${excludeSegs.has(i) ? 'on' : ''}`}
-                  onClick={() => toggleSeg(i, excludeSegs, setExcludeSegs)}
-                >
-                  {s.name} <span className="cnt">{s.count}</span>
-                </button>
-              ))}
-            </div>
+            <SegmentSelect selectedIds={excludeSegs} onChange={setExcludeSegs} addLabel="Add exclusion cohort" />
           </ToggleRow>
           <ToggleRow
             label="Hold out a control group"

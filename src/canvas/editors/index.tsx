@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { PillGroup, Toggle } from '../../components/ui'
 import { newCondRow, newSplitPath } from '../registry'
+import { useEditorEnv } from './env'
 import type { CampaignBase, ConfigByKind, NodeKind } from '../types'
 
 export type EditorFor<K extends NodeKind> = (props: {
@@ -333,12 +334,25 @@ const SegmentEditor: EditorFor<'segment'> = ({ config, onChange }) => (
     <SelectField label="Segment" value={config.segment} options={SEGMENTS} placeholder="Select a segment…" onChange={segment => onChange({ ...config, segment })} />
   </div>
 )
-const JumpEditor: EditorFor<'jump'> = ({ config, onChange }) => (
-  <div className="editor-form">
-    <TextField label="Target node id" value={config.targetId ?? ''} placeholder="Node the user jumps to" onChange={v => onChange({ ...config, targetId: v || null })} />
-    <p className="editor-hint">The user is sent to the target node instead of continuing along the edge — useful for loops and shortcuts.</p>
-  </div>
-)
+const JumpEditor: EditorFor<'jump'> = ({ config, onChange }) => {
+  const { nodeOptions } = useEditorEnv()
+  return (
+    <div className="editor-form">
+      <Field label="Jump to node">
+        <select className="select input-md" value={config.targetId ?? ''} onChange={e => onChange({ ...config, targetId: e.target.value || null })}>
+          <option value="">Select a node…</option>
+          {nodeOptions.map(o => (
+            <option key={o.id} value={o.id}>
+              {o.title}
+            </option>
+          ))}
+        </select>
+      </Field>
+      {nodeOptions.length === 0 && <p className="editor-hint">Add other steps first, then choose where this jump lands.</p>}
+      <p className="editor-hint">The user is sent to the target node instead of continuing along the edge — useful for loops and shortcuts.</p>
+    </div>
+  )
+}
 
 /* ── registry — exhaustive: a missing kind is a compile error ──── */
 export const NODE_EDITORS: { [K in NodeKind]: EditorFor<K> } = {

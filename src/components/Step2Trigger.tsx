@@ -1,19 +1,10 @@
 import React, { useState } from 'react'
 import { Card, Radio, RadioRail, TimeGroup, TimezoneRow, ToggleRow } from './ui'
+import { EventPicker } from './EventPicker'
 import type { RailItem } from './ui'
 import type { EventCondition, ExitCondition, FixedSchedule, TriggerType } from '../types'
 
 /* ── option lists ─────────────────────────────────────────────── */
-const APP_EVENTS = [
-  'Select an event',
-  'US_Stocks_RFI_Submitted',
-  'SIP_Mandate_Created',
-  'First_Investment_Complete',
-  'KYC_Completed',
-  'App_Opened',
-  'Watchlist_Stock_Added',
-]
-const EXIT_EVENTS = ['Select an event', 'Subscription_Purchased', 'Account_Deleted', 'Uninstall']
 const JOURNEYS = ['Select journey', 'US Stocks RFI Reminder', 'KYC Onboarding v2', 'SIP Winback — Q2', 'Digital Gold Launch']
 const EXIT_STAGES = ['any exit', 'Goal met', 'Exit: no-CTA', 'Expired']
 
@@ -99,6 +90,7 @@ function SettingsCard() {
 /* ── shared: journey-exit-conditions card ─────────────────────── */
 function ExitConditionsCard() {
   const [on, setOn] = useState(false)
+  const [exitEvent, setExitEvent] = useState('Select an event')
   return (
     <Card title="Journey exit">
       <div className="spacer-8" />
@@ -110,11 +102,7 @@ function ExitConditionsCard() {
       >
         <div className="cond-row">
           <span className="cond-verb">Has executed</span>
-          <select className="select input-md" defaultValue="Select an event">
-            {EXIT_EVENTS.map(e => (
-              <option key={e}>{e}</option>
-            ))}
-          </select>
+          <EventPicker value={exitEvent} onChange={setExitEvent} />
           <button className="x" aria-label="Remove condition">
             ✕
           </button>
@@ -211,15 +199,10 @@ function EventPanel(props: {
               {i > 0 && <span className="or-chip">OR</span>}
               <div className="cond-row">
                 <span className="cond-verb">Has executed</span>
-                <select
-                  className="select input-md"
+                <EventPicker
                   value={c.event}
-                  onChange={e => props.setConds(props.conds.map(x => (x.id === c.id ? { ...x, event: e.target.value } : x)))}
-                >
-                  {APP_EVENTS.map(ev => (
-                    <option key={ev}>{ev}</option>
-                  ))}
-                </select>
+                  onChange={name => props.setConds(props.conds.map(x => (x.id === c.id ? { ...x, event: name } : x)))}
+                />
                 <button className="x" aria-label="Remove condition" onClick={() => remove(c.id)}>
                   ✕
                 </button>

@@ -1,6 +1,8 @@
 import { useMemo, useState } from 'react'
 import { NODE_TYPES, summarize } from './registry'
 import { NODE_EDITORS } from './editors'
+import { EditorEnvContext } from './editors/env'
+import type { NodeOption } from './editors/env'
 import { NodeGlyph } from './icons'
 import type { JourneyNode, JourneyNodeConfig, JourneyNodeData } from './types'
 
@@ -8,12 +10,13 @@ type EditorComponent = (props: { config: JourneyNodeConfig; onChange: (c: Journe
 
 interface NodeEditorSheetProps {
   node: JourneyNode
+  nodeOptions: NodeOption[]
   onSave: (patch: Partial<JourneyNodeData>) => void
   onClose: () => void
   onSendTest: () => void
 }
 
-export function NodeEditorSheet({ node, onSave, onClose, onSendTest }: NodeEditorSheetProps) {
+export function NodeEditorSheet({ node, nodeOptions, onSave, onClose, onSendTest }: NodeEditorSheetProps) {
   const def = NODE_TYPES[node.data.kind]
   const [title, setTitle] = useState(node.data.title)
   const [config, setConfig] = useState<JourneyNodeConfig>(node.data.config)
@@ -61,7 +64,9 @@ export function NodeEditorSheet({ node, onSave, onClose, onSendTest }: NodeEdito
         </div>
 
         <div className="sheet-body">
-          <Editor config={config} onChange={setConfig} />
+          <EditorEnvContext.Provider value={{ nodeOptions }}>
+            <Editor config={config} onChange={setConfig} />
+          </EditorEnvContext.Provider>
         </div>
 
         {confirming ? (

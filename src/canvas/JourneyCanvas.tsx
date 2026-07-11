@@ -420,6 +420,7 @@ function CanvasInner(props: CanvasProps) {
           <NodeEditorSheet
             key={editingNode.id}
             node={editingNode}
+            nodeOptions={g.nodes.filter(n => n.id !== editingNode.id).map(n => ({ id: n.id, title: n.data.title }))}
             onSave={patch => {
               g.updateNodeData(editingNode.id, patch)
               props.toast('Changes saved')
