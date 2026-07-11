@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { Card, Radio, RadioRail, TimeGroup, TimezoneRow, ToggleRow } from './ui'
+import { Card, Radio, RadioRail, TimeGroup, TimezoneSelect, ToggleRow } from './ui'
 import { EventPicker } from './EventPicker'
 import type { RailItem } from './ui'
 import type { EventCondition, ExitCondition, FixedSchedule, TriggerType } from '../types'
@@ -136,7 +136,7 @@ function ScheduleCard(props: { scope: string; toast: (m: string, k?: 'ok' | 'err
           {pane === 'asap' && (
             <div className="sched-pane">
               <h4>As soon as possible</h4>
-              <TimezoneRow />
+              <TimezoneSelect />
               <div className="ends-row">
                 <span className="ends-label">Ends</span>
                 <Radio name={endsName} label="Never" checked={ends === 'never'} onChange={() => setEnds('never')} />
@@ -148,7 +148,7 @@ function ScheduleCard(props: { scope: string; toast: (m: string, k?: 'ok' | 'err
           {pane === 'date' && (
             <div className="sched-pane">
               <h4>At specific date and time</h4>
-              <TimezoneRow />
+              <TimezoneSelect />
               <div className="inline-fields">
                 <div>
                   <label className="field-label">Start date</label>
@@ -283,7 +283,7 @@ function FixedPanel(props: { toast: (m: string, k?: 'ok' | 'err') => void }) {
             </button>
             <div className="sched-pane">
               <h4>{labels[pane]}</h4>
-              <TimezoneRow />
+              <TimezoneSelect />
 
               {pane === 'asap' && (
                 <div className="preview-line">

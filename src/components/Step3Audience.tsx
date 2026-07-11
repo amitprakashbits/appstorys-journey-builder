@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react'
-import { Card, ToggleRow } from './ui'
+import { Card, RolloutBar, ToggleRow } from './ui'
 import { SegmentSelect } from './SegmentSelect'
 import type { AudienceMode, Rule } from '../types'
 
@@ -151,8 +151,7 @@ export default function Step3Audience(props: {
             onChange={setControl}
           >
             <div className="slider-row">
-              <input type="range" min={1} max={20} value={controlPct} onChange={e => setControlPct(Number(e.target.value))} />
-              <span className="pct">{controlPct}%</span>
+              <RolloutBar value={controlPct} onChange={setControlPct} min={1} max={20} />
               <span style={{ fontSize: 11.5, color: 'var(--tx3)' }}>of eligible users held out</span>
             </div>
           </ToggleRow>
@@ -163,12 +162,10 @@ export default function Step3Audience(props: {
         <h4>Estimated reach</h4>
         <div className="reach-num">{reach.m >= 1 ? reach.m.toFixed(1) + 'M' : Math.round(reach.m * 1000) + 'K'}</div>
         <div className="reach-sub">of 4.8M reachable users on Tickertape</div>
-        <div className="reach-bar">
-          <div className="fill" style={{ width: `${Math.max(reach.pct, 2)}%` }} />
-        </div>
+        <RolloutBar value={reach.pct} readOnly />
         <div className="reach-meta">
-          <span>{reach.pct}%</span>
-          <span>total base</span>
+          <span>{reach.pct}% of base</span>
+          <span>updated live</span>
         </div>
         <div className="reach-sync">Synced 2 min ago</div>
       </aside>

@@ -11,6 +11,7 @@ import ReactFlow, {
 import type { Connection, EdgeTypes, NodeTypes, ReactFlowInstance, XYPosition } from 'reactflow'
 import 'reactflow/dist/style.css'
 import type { AudienceMode, EventCondition, ExitCondition, TriggerType } from '../types'
+import { Tooltip } from '../components/ui'
 import { NODE_TYPES, branchesFor } from './registry'
 import { useJourneyGraph } from './useJourneyGraph'
 import { JourneyNodeView } from './nodes/JourneyNodeView'
@@ -286,7 +287,9 @@ function CanvasInner(props: CanvasProps) {
           ← Back to setup
         </button>
         <span className="cname">{props.journeyName}</span>
-        <span className={`status ${live ? 'live' : ''}`}>{live ? 'LIVE' : 'DRAFT'}</span>
+        <Tooltip label={live ? 'Live — accepting new entries' : 'Draft — not yet published'}>
+          <span className={`status ${live ? 'live' : ''}`}>{live ? 'LIVE' : 'DRAFT'}</span>
+        </Tooltip>
         <span className="spacer" />
         <button className="btn" onClick={() => props.toast('Draft saved')}>
           Save draft

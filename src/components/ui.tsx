@@ -166,17 +166,72 @@ export function Card(props: { title?: React.ReactNode; sub?: string; children: R
   )
 }
 
-/* ── Timezone select (right-aligned) ──────────────────────────── */
-export function TimezoneRow() {
+/* ── Timezone select — single shared source of zones ──────────── */
+export const TIMEZONES = ['Asia/Calcutta (UTC+0530)', 'UTC', 'America/New_York (UTC−0400)', 'Europe/London (UTC+0100)']
+
+export function TimezoneSelect() {
   return (
     <div className="tz-row">
       <div className="wrap">
         <label className="field-label">Campaign time zone</label>
-        <select className="select input-md" defaultValue="Asia/Calcutta (UTC+0530)">
-          <option>Asia/Calcutta (UTC+0530)</option>
-          <option>UTC</option>
-          <option>America/New_York (UTC−0400)</option>
+        <select className="select input-md" defaultValue={TIMEZONES[0]}>
+          {TIMEZONES.map(tz => (
+            <option key={tz}>{tz}</option>
+          ))}
         </select>
+      </div>
+    </div>
+  )
+}
+
+/* ── Tooltip — the one shared hover bubble ────────────────────── */
+export function Tooltip(props: { label: string; children: React.ReactNode }) {
+  const [show, setShow] = useState(false)
+  return (
+    <span className="tooltip-wrap" onMouseEnter={() => setShow(true)} onMouseLeave={() => setShow(false)}>
+      {props.children}
+      {show && <span className="tooltip-bubble" role="tooltip">{props.label}</span>}
+    </span>
+  )
+}
+
+/* ── RolloutBar — the single percentage bar (interactive or read-only) ──
+   Same fill styling + hover readout everywhere a % is shown or set. */
+export function RolloutBar(props: {
+  value: number
+  onChange?: (v: number) => void
+  min?: number
+  max?: number
+  readOnly?: boolean
+}) {
+  const min = props.min ?? 0
+  const max = props.max ?? 100
+  const [hover, setHover] = useState(false)
+  const pct = Math.round(((props.value - min) / (max - min)) * 100)
+  return (
+    <div
+      className={`rollout-bar ${props.readOnly ? 'read-only' : ''}`}
+      onMouseEnter={() => setHover(true)}
+      onMouseLeave={() => setHover(false)}
+    >
+      <div className="rollout-track">
+        <div className="rollout-fill" style={{ width: `${Math.max(pct, 2)}%` }} />
+        {!props.readOnly && (
+          <input
+            className="rollout-input"
+            type="range"
+            min={min}
+            max={max}
+            value={props.value}
+            onChange={e => props.onChange?.(Number(e.target.value))}
+            aria-label="Rollout percentage"
+          />
+        )}
+        {(hover || props.readOnly) && (
+          <span className="rollout-flag" style={{ left: `${Math.min(Math.max(pct, 6), 94)}%` }}>
+            {props.value}%
+          </span>
+        )}
       </div>
     </div>
   )

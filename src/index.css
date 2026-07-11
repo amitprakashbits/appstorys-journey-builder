@@ -109,7 +109,6 @@ body {
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
 .card-title { font-size: 14px; font-weight: 600; margin-bottom: 3px; display: flex; align-items: center; gap: 8px; }
 .card-sub { font-size: 12px; color: var(--tx3); margin: 0 0 16px; line-height: 1.55; }
-.info-i { width: 15px; height: 15px; border-radius: 50%; border: 1.2px solid var(--tx4); color: var(--tx4); font-size: 10px; display: inline-flex; align-items: center; justify-content: center; cursor: help; font-weight: 600; }
 
 .field-label { font-size: 12px; font-weight: 500; color: var(--tx2); margin-bottom: 7px; display: block; }
 .field-label .req { color: var(--red); }
@@ -241,7 +240,21 @@ body {
 .rule-row .x { background: none; border: none; color: var(--tx4); margin-left: auto; }
 .rule-row .x:hover { color: var(--red); }
 .slider-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; }
-input[type='range'] { accent-color: var(--brand); width: 220px; }
+.slider-row .rollout-bar { flex: 1 1 180px; }
+
+/* RolloutBar — the one percentage bar (control + read-only meter) */
+.rollout-bar { display: flex; align-items: center; }
+.reach > .rollout-bar { margin: 18px 0 8px; }
+.rollout-track { position: relative; flex: 1; height: 8px; background: var(--line-soft); border-radius: 6px; }
+.rollout-fill { position: absolute; left: 0; top: 0; height: 100%; background: var(--brand-grad); border-radius: 6px; transition: width 0.25s ease; }
+.rollout-input { position: absolute; top: -6px; left: 0; width: 100%; height: 20px; margin: 0; opacity: 0; cursor: pointer; }
+.rollout-flag { position: absolute; bottom: calc(100% + 7px); transform: translateX(-50%); background: #1C1C28; color: #fff; font-size: 10.5px; font-weight: 600; padding: 2px 7px; border-radius: 5px; white-space: nowrap; pointer-events: none; }
+.rollout-flag::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 4px solid transparent; border-top-color: #1C1C28; }
+
+/* Tooltip — the one shared hover bubble */
+.tooltip-wrap { position: relative; display: inline-flex; }
+.tooltip-bubble { position: absolute; bottom: calc(100% + 7px); left: 50%; transform: translateX(-50%); background: #1C1C28; color: #fff; font-size: 11px; font-weight: 500; padding: 5px 9px; border-radius: 6px; white-space: nowrap; z-index: 50; box-shadow: var(--shadow-md); pointer-events: none; }
+.tooltip-bubble::after { content: ''; position: absolute; top: 100%; left: 50%; transform: translateX(-50%); border: 5px solid transparent; border-top-color: #1C1C28; }
 .pct { font-size: 13px; font-weight: 600; color: var(--tx); width: 44px; }
 
 /* ============ FOOTER ============ */

@@ -69,14 +69,7 @@ export default function Step1Details(props: {
       </Card>
 
       <Card
-        title={
-          <>
-            Conversion goal{' '}
-            <span className="info-i" title="A goal event lets AppStorys attribute conversions to this journey">
-              i
-            </span>
-          </>
-        }
+        title="Conversion goal"
         sub="Track what success looks like. Users who perform a goal event within the attribution window are counted as converted."
       >
         {props.goals.map(g => (
