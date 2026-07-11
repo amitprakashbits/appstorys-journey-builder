@@ -86,9 +86,10 @@ export function NodePalette({ onPick, onClose }: NodePaletteProps) {
     window.setTimeout(() => document.body.removeChild(ghost), 0)
   }
 
+  const famCount = KINDS_BY_FAMILY[family].length
   const headline = searching
     ? `${visible.length} result${visible.length === 1 ? '' : 's'}`
-    : `${FAMILY_LABEL[family].toUpperCase()} · ${KINDS_BY_FAMILY[family].length} TYPES${family === 'campaign' || family === 'message' ? ' · PICK ONE TO CREATE OR IMPORT' : ''}`
+    : `${FAMILY_LABEL[family].toUpperCase()} · ${famCount} TYPE${famCount === 1 ? '' : 'S'}${family === 'campaign' || family === 'message' ? ' · PICK ONE TO CREATE OR IMPORT' : ''}`
 
   return (
     <div className="palette-scrim" onMouseDown={onClose}>
