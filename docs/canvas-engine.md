@@ -69,10 +69,16 @@ App.tsx ──props──▶ Canvas.tsx ──▶ JourneyCanvas (ReactFlowProvid
    category, description, defaults; `branches` if it forks like Condition) and a
    `case` in `makeDefaultConfig` — the `never` guard makes a missing case a
    compile error.
-3. Add it to a `PALETTE_CATEGORIES` group.
+3. Add it to a `PALETTE_CATEGORIES` group, and add a `case` to `summarize()`
+   (the node-card meta line) — again `never`-guarded.
+4. Add an editor to `NODE_EDITORS` in `src/canvas/editors/` — the registry is
+   typed `{ [K in NodeKind]: EditorFor<K> }`, so a missing editor is a **compile
+   error** (no dead nodes). Double-clicking a node (or its toolbar Edit button)
+   opens the right-side `NodeEditorSheet`, which renders this editor against a
+   draft config and writes back via `updateNodeData` on Save.
 
-That is all — the custom node renderer, palette, minimap tint and validation are
-all driven off the registry.
+That is all — the custom node renderer, palette, minimap tint, validation and
+editor are all driven off the registries.
 
 ## Notes / follow-ups
 

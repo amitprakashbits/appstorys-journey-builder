@@ -72,6 +72,24 @@ export const PALETTE_CATEGORIES: { name: NodeKindDef['category']; kinds: NodeKin
   { name: 'Logic', kinds: ['cond', 'delay'] },
 ]
 
+/* Meta line shown on the node card, derived from its config. Exhaustive. */
+export function summarize(config: JourneyNodeConfig): string {
+  switch (config.kind) {
+    case 'story':
+      return config.campaignId ? `${config.campaignName} · CTR —` : 'No campaign selected'
+    case 'push':
+      return `${config.priority === 'high' ? 'High' : 'Normal'} priority · CTR —`
+    case 'cond':
+      return `${config.rows.length} rule${config.rows.length === 1 ? '' : 's'} · ${config.yesLabel} / ${config.noLabel}`
+    case 'delay':
+      return `Wait ${config.amount} ${config.unit.toLowerCase()}${config.respectDnd ? ' · Respects DND' : ''}`
+    default: {
+      const _exhaustive: never = config
+      return _exhaustive
+    }
+  }
+}
+
 let cfgSeq = 0
 
 /* Exhaustive over NodeKind — a new kind without a case is a compile error. */

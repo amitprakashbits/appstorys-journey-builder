@@ -16,6 +16,7 @@ import { useJourneyGraph } from './useJourneyGraph'
 import { JourneyNodeView } from './nodes/JourneyNodeView'
 import { JourneyEdgeView } from './edges/JourneyEdgeView'
 import { NodePalette, DND_MIME } from './NodePalette'
+import { NodeEditorSheet } from './NodeEditorSheet'
 import { CanvasContext } from './context'
 import { EdgeDnDContext } from './edges/edgeDnd'
 import { layeredLayout } from './layout'
@@ -64,6 +65,7 @@ function CanvasInner(props: CanvasProps) {
   const [palette, setPalette] = useState<PaletteState>(null)
   const [dropEdgeId, setDropEdgeId] = useState<string | null>(null)
   const [showHelp, setShowHelp] = useState(false)
+  const [editingId, setEditingId] = useState<string | null>(null)
   const connectRef = useRef<{ source: string; sourceHandle: string | null } | null>(null)
   const edgeUpdateOk = useRef(true)
   const reduced = useMemo(prefersReducedMotion, [])
@@ -279,7 +281,7 @@ function CanvasInner(props: CanvasProps) {
       entryId: g.entryId,
       entryBadge,
       reducedMotion: reduced,
-      onEditNode: () => props.toast('Node editor opens here (P2)'),
+      onEditNode: (id: string) => setEditingId(id),
       onDuplicateNode: (id: string) => g.duplicateNode(id),
       onTestNode: () => props.toast('Test sent to your test device'),
       onDeleteNode: (id: string) => g.deleteNode(id),
@@ -287,6 +289,8 @@ function CanvasInner(props: CanvasProps) {
     }),
     [g, entryBadge, reduced, onInsertOnEdge, props],
   )
+
+  const editingNode = editingId ? g.nodes.find(n => n.id === editingId) ?? null : null
 
   return (
     <div className="screen canvas-screen">
@@ -314,6 +318,7 @@ function CanvasInner(props: CanvasProps) {
               onNodesChange={g.onNodesChange}
               onEdgesChange={g.onEdgesChange}
               onNodeDragStart={g.beginInteraction}
+              onNodeDoubleClick={(_e, node) => setEditingId(node.id)}
               onConnect={onConnect}
               onConnectStart={onConnectStart}
               onConnectEnd={onConnectEnd}
@@ -423,6 +428,19 @@ function CanvasInner(props: CanvasProps) {
         </div>
 
         {palette && <NodePalette x={palette.x} y={palette.y} onPick={onPalettePick} onClose={() => setPalette(null)} />}
+
+        {editingNode && (
+          <NodeEditorSheet
+            key={editingNode.id}
+            node={editingNode}
+            onSave={patch => {
+              g.updateNodeData(editingNode.id, patch)
+              props.toast('Changes saved')
+            }}
+            onClose={() => setEditingId(null)}
+            onSendTest={() => props.toast('Test sent to your test device')}
+          />
+        )}
       </div>
     </div>
   )

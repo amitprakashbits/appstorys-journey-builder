@@ -66,6 +66,7 @@ export interface JourneyGraph {
   detachEdge: (edgeId: string) => void
   deleteSelection: () => void
   duplicateSelection: () => void
+  updateNodeData: (id: string, data: Partial<JourneyNode['data']>) => void
   deleteNode: (id: string) => void
   duplicateNode: (id: string) => void
   nudgeSelection: (dx: number, dy: number) => void
@@ -205,6 +206,14 @@ export function useJourneyGraph(): JourneyGraph {
     })
   }, [pushHistory])
 
+  const updateNodeData = useCallback(
+    (id: string, data: Partial<JourneyNode['data']>) => {
+      pushHistory()
+      setGraph(g => ({ ...g, nodes: g.nodes.map(n => (n.id === id ? { ...n, data: { ...n.data, ...data } } : n)) }))
+    },
+    [pushHistory],
+  )
+
   const deleteNode = useCallback(
     (id: string) => {
       pushHistory()
@@ -336,6 +345,7 @@ export function useJourneyGraph(): JourneyGraph {
     detachEdge,
     deleteSelection,
     duplicateSelection,
+    updateNodeData,
     deleteNode,
     duplicateNode,
     nudgeSelection,

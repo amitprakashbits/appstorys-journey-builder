@@ -74,6 +74,28 @@ export function RadioRail<Id extends string>(props: {
   )
 }
 
+/* ── PillGroup — single-select segmented control ──────────────── */
+export function PillGroup<T extends string>(props: {
+  value: T
+  options: { value: T; label: string }[]
+  onChange: (v: T) => void
+}) {
+  return (
+    <span className="pill-group">
+      {props.options.map(o => (
+        <button
+          type="button"
+          key={o.value}
+          className={props.value === o.value ? 'on' : ''}
+          onClick={() => props.onChange(o.value)}
+        >
+          {o.label}
+        </button>
+      ))}
+    </span>
+  )
+}
+
 /* ── Toggle ───────────────────────────────────────────────────── */
 export function Toggle(props: { checked: boolean; onChange: (v: boolean) => void }) {
   return (
