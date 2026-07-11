@@ -1,56 +1,83 @@
-# Canvas engine — React Flow vs. in-house
+# Canvas engine — React Flow, n8n-style
 
-**Decision: adopt [React Flow](https://reactflow.dev) (`reactflow` v11).** No blocker found.
-This note is the feasibility check required by P1 before wiring it in.
+**Decision: [React Flow](https://reactflow.dev) (`reactflow` v11).** The Journey
+Builder canvas is a free-form, direct-manipulation editor modelled on n8n but
+skinned 100% in the AppStorys light/orange/Poppins system.
 
-## Why we needed to choose
+## Why React Flow (not in-house)
 
-The pre-P1 canvas was a static horizontal flex row (`.chain`) of `.node` cards
-joined by `.connector` divs, with `overflow-x: auto`. It cannot pan/zoom, has no
-edge model, and every node is a plain div with no port/anchor concept. P1
-(scrollable n8n-style canvas), P6 (insert-on-edge interactions) and P7 (template
-hydration of nodes/edges) all need a real graph engine with pan/zoom, a typed
-node/edge model, custom node + edge renderers, and edge-interaction hooks.
+The pre-canvas builder was a static horizontal flex chain — no pan/zoom, no edge
+model, no ports. Every interaction below would have been weeks of custom gesture,
+hit-testing and transform math. React Flow gives us pan/zoom, a typed
+node/edge model, custom node/edge renderers, connection dragging, edge
+reconnection, a minimap and viewport helpers out of the box (~45 KB gzip, plus
+dagre ~30 KB for auto-layout). No blocker found.
 
-## Comparison
+## n8n interactions replicated
 
-| Capability | React Flow v11 | In-house (extend `.chain`) |
-|---|---|---|
-| Pan / zoom (drag, trackpad, pinch, space+drag) | Built in, battle-tested | Weeks of custom transform/gesture math |
-| Fit-view on load | `fitView` prop + `useReactFlow().fitView()` | Hand-rolled bbox + transform |
-| Custom node renderer | `nodeTypes` — renders any React component; we wrap our existing `.node` markup 1:1 | We already have the markup, but no positioning/viewport layer |
-| Custom edge renderer | `edgeTypes` + `getSmoothStepPath`; trivially themed to `#F0AA7B` | SVG path + arrow marker by hand |
-| Edge interaction APIs (needed for P6) | `onEdgeMouseEnter/Leave`, edge label renderer, `onConnect`, drop targets | Would need bespoke hit-testing on SVG paths |
-| Controlled, typed state | `Node<TData>[]` / `Edge[]`, `useNodesState`/`useEdgesState`; our data typed as `AppNodeData` | Typed, but we build every helper |
-| Undo-friendliness | State is a plain serialisable array we own → snapshot/restore is trivial | Same, but only after building the model |
-| Bundle size | ~45 KB gzipped (`reactflow` core) | ~0, but offset by the code we'd write + maintain |
+| n8n interaction | How |
+|---|---|
+| Free-form draggable nodes | Default RF node drag; position persisted on `node.position`. No forced lane. |
+| Drag palette row → drop on canvas | HTML5 DnD; `screenToFlowPosition` maps the drop point; `addNode` at that point. Ghost = `setDragImage` of a 60%-scale node card. |
+| Drag handle → node = connect | RF connection drag; `connectionRadius=24` magnetic snap; handles are 18px hit / 10px visual. |
+| Drag handle → empty canvas = connect + add | `onConnectStart` records the source; `onConnectEnd` on the pane opens the palette; pick → `addNodeWithConnection`. |
+| Reconnect / detach an edge | `edgesUpdatable` + `onEdgeUpdate` (rewire) / `onEdgeUpdateEnd` (drop on empty → `detachEdge`). |
+| Hover edge → midpoint “+” | Custom edge renders an `EdgeLabelRenderer` “+”; click opens the palette; `insertOnEdge` splits the edge and nudges downstream nodes. |
+| Drag palette row → drop on edge | `onDragOver` hit-tests `[data-edge-id]`, highlights it; drop → `insertOnEdge`. |
+| Marquee select / shift-multiselect | `selectionOnDrag`, `multiSelectionKeyCode="Shift"`. |
+| Space/middle drag pan, ⌘-scroll zoom | `panActivationKeyCode="Space"`, `panOnDrag={[1,2]}`, `panOnScroll`. |
+| Node hover toolbar | RF `<NodeToolbar>` — Edit / Duplicate / Test / Delete pill. |
 
-## Bundle-size note
+Invalid connections (self, into the entry node, duplicates, cycles) are blocked
+by `isValidConnection` and explained with an error toast.
 
-`reactflow` adds ~45 KB gzip. Acceptable: it replaces code we would otherwise
-write and maintain, and it is the same engine n8n-style tools use, so P6's
-insert-on-edge feel comes largely for free. If size ever matters we can import
-from `@reactflow/core` + only the packs we use.
+## State model
 
-## How we use it (P1 scope)
+```
+App.tsx ──props──▶ Canvas.tsx ──▶ JourneyCanvas (ReactFlowProvider)
+                                     │
+                                     ▼
+                            useJourneyGraph()  ← single mutation choke point
+                              { nodes, edges, entryId }        + history stack (≤50)
+                              actions: addNode · addNodeWithConnection · insertOnEdge
+                                       connect · reconnect · detachEdge · deleteSelection
+                                       duplicateSelection · deleteNode · duplicateNode
+                                       nudgeSelection · selectAll · setLayout · undo · redo
+                                     │
+             ┌───────────────────────┼───────────────────────┐
+             ▼                       ▼                       ▼
+      JourneyNodeView          JourneyEdgeView           NodePalette
+   (.node card + handles     (bezier #F0AA7B +        (search + categories,
+    + NodeToolbar)            midpoint “+”)            draggable rows)
+```
 
-- **Source of truth:** `Node<AppNodeData>[]` + `Edge[]`, controlled via
-  `useNodesState` / `useEdgesState`. `AppNodeData` is fully typed (no `any`).
-- **No Start/End nodes.** Entry is implicit: the node with no incoming edge is
-  the entry step and renders the wizard's trigger config as a **badge**. A node
-  with no outgoing edge is terminal and renders a small dot cap on its source
-  port. Both flags are derived from the edge set each render, never stored.
-- **Custom node** (`AppFlowNode`) wraps the existing `.node` card markup 1:1 so
-  the cards look identical to before; `<Handle>`s are added for wiring.
-- **Custom edge** (`AppEdge`) draws a smooth-step path in the connector color
-  `#F0AA7B`. P6 extends this same edge with the hover-`+` insert affordance.
-- **Bottom toolbar** (custom, not React Flow's default `<Controls>`) holds
-  zoom-out / zoom-in / fit-view / add-step. Nothing is docked top-left/right;
-  the page toolbar (Back / name / status / Save / Publish) stays above the canvas.
+- **Single choke point:** components never call `setNodes`/`setEdges`; every
+  mutation is a named action on `useJourneyGraph`, so undo/redo has one place to
+  snapshot. RF change events (`onNodesChange`/`onEdgesChange`) apply transiently;
+  drags snapshot once on `onNodeDragStart` (`beginInteraction`).
+- **Derived, not stored:** a node is the *entry* if `id === entryId` (first node
+  added); it is *terminal* per handle if no edge leaves that handle (read from
+  the RF store inside the node). Neither is written into node data.
+- **Undo/redo:** bounded (50) past/future stacks of `{nodes, edges, entryId}`
+  snapshots. Continuous ops (drag, arrow-nudge) coalesce to one entry.
 
-## Risks / follow-ups
+## Adding a new node kind (registry steps)
 
-- React Flow renders an attribution badge (bottom-right) on the MIT tier; we keep
-  it. P7's bottom-right floater must sit clear of it and of the bottom toolbar.
-- Node auto-layout is a simple left-to-right append in P1. If journeys grow
-  branches (Condition yes/no), a layout pass (e.g. dagre) may be worth adding.
+1. Add the literal to `NodeKind` in `src/canvas/types.ts` and a `…Config`
+   variant to the `JourneyNodeConfig` union.
+2. Add a `NODE_KINDS[kind]` entry in `src/canvas/registry.ts` (label, color,
+   category, description, defaults; `branches` if it forks like Condition) and a
+   `case` in `makeDefaultConfig` — the `never` guard makes a missing case a
+   compile error.
+3. Add it to a `PALETTE_CATEGORIES` group.
+
+That is all — the custom node renderer, palette, minimap tint and validation are
+all driven off the registry.
+
+## Notes / follow-ups
+
+- React Flow measurement + zoom are `requestAnimationFrame`-gated, so the canvas
+  renders blank in a **hidden/background browser tab** (rAF is paused there). It
+  renders correctly in a visible tab — verify in a foregrounded window.
+- Animated “flow” dash on edges is wired (`.canvas-shell.simulate`) for a future
+  simulate mode; static otherwise. All motion respects `prefers-reduced-motion`.

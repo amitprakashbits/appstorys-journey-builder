@@ -285,36 +285,103 @@ input[type='range'] { accent-color: var(--brand); width: 220px; }
 .palette .sw { width: 9px; height: 9px; border-radius: 3px; flex-shrink: 0; }
 .palette.up { position: absolute; bottom: calc(100% + 10px); top: auto; }
 
-/* ── React Flow canvas engine (P1) ────────────────────────────── */
+/* ══ n8n-like canvas engine (React Flow) ═══════════════════════ */
 .canvas-shell .react-flow { width: 100%; height: 100%; background: transparent; }
 .canvas-shell .react-flow__attribution { display: none; }
+
 /* our .node card renders 1:1 inside the RF node wrapper */
-.react-flow__node-app { width: 232px; }
-.react-flow__node-app.selected .node { box-shadow: 0 0 0 2px var(--brand), var(--shadow-md); border-color: var(--brand); }
-/* connect handles are non-interactive in P1; keep them out of the way */
-.rf-handle { width: 8px; height: 8px; min-width: 0; min-height: 0; border: none; background: transparent; }
-.rf-handle.terminal { background: #F0AA7B; box-shadow: 0 0 0 3px #FBFBFD; }
-/* entry-trigger badge on the first node (replaces the old Start node) */
+.react-flow__node-journey { width: 232px; }
+.node { transition: box-shadow 0.18s, border-color 0.18s; }
 .node.is-entry { border: 1.5px solid var(--brand); box-shadow: 0 8px 24px -8px var(--brand-shadow); }
+.node.is-selected { border: 1.5px solid var(--brand); background: var(--cream); box-shadow: var(--shadow-lg); }
 .node-entry-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brand); background: var(--cream); border: 1px solid var(--brand-border); border-radius: 20px; padding: 3px 9px; margin-bottom: 9px; }
 
+/* condition YES/NO branch rows + chips */
+.node-branches { margin-top: 10px; display: flex; flex-direction: column; gap: 6px; }
+.branch-row { display: flex; justify-content: flex-end; }
+.branch-chip { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; padding: 2px 7px; border-radius: 5px; }
+.branch-chip.yes { color: #067A57; background: var(--green-bg); border: 1px solid var(--green-bd); }
+.branch-chip.no { color: #B42318; background: var(--red-bg); border: 1px solid #FECDCA; }
+
+/* ports/handles — 18px forgiving hit area, 10px visual dot, n8n grab affordance */
+.react-flow__handle.rf-handle { width: 18px; height: 18px; min-width: 0; min-height: 0; border: none; background: transparent; border-radius: 50%; }
+.react-flow__handle.rf-handle::after { content: ''; position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; transform: translate(-50%, -50%); border-radius: 50%; background: #fff; border: 1.5px solid #D3D6DC; transition: width 0.15s, height 0.15s, background 0.15s, border-color 0.15s; }
+.react-flow__handle.rf-handle:hover::after { width: 14px; height: 14px; background: var(--brand); border-color: var(--brand); }
+.react-flow__handle.rf-handle.terminal::after { background: #C6CAD1; border-color: #C6CAD1; }
+.react-flow__handle.rf-handle.connectingfrom::after,
+.react-flow__handle.rf-handle.connectingto::after { background: var(--brand); border-color: var(--brand); }
+
+/* node hover/selection toolbar (React Flow NodeToolbar) */
+.node-toolbar { display: flex; gap: 2px; background: #fff; border: 1px solid var(--line); border-radius: 9px; box-shadow: var(--shadow-lg); padding: 3px; }
+.ntb-btn { width: 28px; height: 28px; border: none; background: none; border-radius: 6px; color: var(--tx3); display: inline-flex; align-items: center; justify-content: center; transition: all 0.15s; }
+.ntb-btn:hover { background: var(--cream); color: var(--tx); }
+.ntb-btn.danger:hover { background: var(--red-bg); color: var(--red); }
+.ntb-btn svg { stroke: currentColor; }
+
+/* edges */
+.journey-edge { transition: stroke-width 0.15s; }
+.journey-edge.is-drop-target { filter: drop-shadow(0 0 3px var(--brand-shadow)); stroke: var(--brand); }
+.canvas-shell.simulate .journey-edge { stroke-dasharray: 6 5; animation: dashflow 1.5s linear infinite; }
+@keyframes dashflow { to { stroke-dashoffset: -22; } }
+.edge-plus-wrap { position: absolute; pointer-events: none; opacity: 0; transition: opacity 0.15s; }
+.edge-plus-wrap.show { opacity: 1; pointer-events: all; }
+.edge-plus { width: 26px; height: 26px; border-radius: 50%; border: none; background: var(--brand-grad); color: #fff; font-size: 15px; font-weight: 600; box-shadow: var(--shadow-md); display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s; }
+.edge-plus:hover { transform: scale(1.18); }
+
+/* palette drag ghost (HTML5 setDragImage preview) */
+.node.drag-ghost { position: absolute; top: -1000px; left: -1000px; width: 200px; opacity: 0.6; transform: scale(0.6); pointer-events: none; }
+
+/* node palette popover */
+.node-palette { width: 258px; padding: 8px; max-height: 340px; display: flex; flex-direction: column; }
+.palette-search { width: 100%; border: 1px solid #D3D6DC; border-radius: 8px; padding: 8px 11px; font-size: 12.5px; font-family: inherit; outline: none; margin-bottom: 6px; }
+.palette-search:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(251, 101, 20, 0.12); }
+.palette-list { overflow-y: auto; }
+.palette-group-title { font-size: 10px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--tx4); padding: 8px 8px 5px; }
+.palette-row { display: flex; align-items: center; gap: 10px; width: 100%; text-align: left; background: none; border: none; padding: 8px 9px; border-radius: 9px; transition: background 0.12s; }
+.palette-row.active { background: var(--cream); }
+.palette-row .sw { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+.palette-row-text { display: flex; flex-direction: column; gap: 1px; }
+.palette-row-name { font-size: 12.5px; font-weight: 600; color: var(--tx); }
+.palette-row-desc { font-size: 10.5px; color: var(--tx3); }
+.palette-empty { font-size: 12px; color: var(--tx3); padding: 12px 9px; }
+
 /* empty journey → a single centered ＋ button, nothing else */
-.canvas-empty { position: absolute; inset: 0; display: grid; place-items: center; z-index: 6; pointer-events: none; }
+.canvas-empty { position: absolute; inset: 0; display: grid; place-items: center; align-content: center; gap: 12px; z-index: 6; pointer-events: none; }
 .canvas-empty > * { pointer-events: auto; }
-.canvas-empty .add-node { width: 172px; height: 104px; }
+.canvas-empty .add-node { width: 96px; height: 96px; border-radius: 50%; }
+.canvas-empty .add-node .plus { font-size: 30px; }
+.canvas-empty-hint { font-size: 13px; color: var(--tx3); font-weight: 500; pointer-events: none; }
 
 /* bottom-center floating toolbar */
-.canvas-bottom-bar { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 6px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 6px; z-index: 8; }
+.canvas-bottom-bar { position: absolute; bottom: 18px; left: 50%; transform: translateX(-50%); display: flex; align-items: center; gap: 4px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 6px; z-index: 8; }
 .cbtn { height: 32px; min-width: 32px; padding: 0 9px; border: none; background: none; border-radius: 8px; color: var(--tx2); font-size: 16px; font-weight: 600; display: inline-flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.18s; }
 .cbtn:hover { background: var(--cream); color: var(--tx); }
 .cbtn svg { stroke: currentColor; }
-.cbtn.add { font-size: 12.5px; font-weight: 600; padding: 0 13px; color: var(--brand); }
-.cbtn.add .plus { font-size: 15px; }
-.cbtn.add:hover { background: var(--cream); }
-.cbtn:disabled { opacity: 0.4; pointer-events: none; }
+.cbtn.on { background: var(--cream); color: var(--brand); }
+.cbtn:disabled { opacity: 0.35; pointer-events: none; }
+.cbar-zoom { font-size: 11.5px; font-weight: 600; color: var(--tx3); min-width: 38px; text-align: center; font-variant-numeric: tabular-nums; }
 .cbar-sep { width: 1px; align-self: stretch; background: var(--line); margin: 2px 3px; }
-.cbar-add { position: relative; }
-.cbar-add .palette { left: auto; right: 0; transform: none; }
+
+/* shortcuts popover */
+.shortcuts-pop { position: absolute; bottom: calc(100% + 10px); right: 0; width: 244px; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); box-shadow: var(--shadow-lg); padding: 10px 12px; z-index: 12; }
+.shortcuts-title { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--tx4); margin-bottom: 8px; }
+.shortcut-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 3px 0; font-size: 11.5px; color: var(--tx2); }
+.shortcut-row kbd { font-family: inherit; font-size: 10.5px; font-weight: 600; color: var(--tx3); background: var(--bg); border: 1px solid var(--line); border-radius: 5px; padding: 2px 6px; white-space: nowrap; }
+
+/* restyled minimap */
+.react-flow__minimap.journey-minimap { background: #fff; border: 1px solid var(--line); border-radius: 10px; box-shadow: var(--shadow-md); bottom: 16px; right: 16px; }
+.react-flow__minimap.journey-minimap .react-flow__minimap-node { opacity: 0.4; }
+
+/* tidy-up animates node transforms briefly */
+.canvas-shell.tidying .react-flow__node { transition: transform 0.3s ease; }
+
+@media (prefers-reduced-motion: reduce) {
+  .react-flow__handle.rf-handle::after { transition: none; }
+  .react-flow__handle.rf-handle:hover::after { width: 10px; height: 10px; }
+  .canvas-shell.simulate .journey-edge { animation: none; }
+  .canvas-shell.tidying .react-flow__node { transition: none; }
+  .edge-plus { transition: none; }
+}
 
 .toast { position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%) translateY(16px); background: #1C1C28; border-radius: 10px; padding: 11px 18px; font-size: 12.5px; font-weight: 500; color: #fff; opacity: 0; pointer-events: none; transition: all 0.3s ease; z-index: 200; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 9px; }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }

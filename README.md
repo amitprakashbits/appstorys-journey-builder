@@ -37,9 +37,17 @@ Node 18+ recommended.
 - **Step 3 — Who will enter the journey**: All users / Segments / Custom rules,
   segment chips with counts, AND rule builder, exclusion segments,
   control-group holdout slider, and a live **estimated reach** panel.
-- **Canvas**: entry-trigger node populated from the wizard config, add-step
-  palette (Story / Push / Condition / Delay), draft save, and publish
-  validation (blocks publishing with no steps or an unselected trigger event).
+- **Canvas** (n8n-like, React Flow): a free-form, infinite pan/zoom editor.
+  Nodes are draggable cards placed anywhere; connect by dragging from a node's
+  right-edge port to another node's left port (drop on empty canvas to add +
+  connect in one go); hover any edge for a midpoint "+" to insert inline; drag
+  palette rows onto the canvas or onto an edge. Condition nodes fork into
+  YES/NO branches. Entry trigger shows as a badge on the first node — no
+  Start/End nodes. Bottom toolbar (zoom / fit / snap / tidy-up / undo-redo),
+  restyled minimap, full keyboard layer (delete, ⌘D duplicate, ⌘Z/⇧⌘Z
+  undo-redo, ⌘A select-all, arrow-nudge), and publish validation (≥1 node,
+  trigger configured, no orphaned Condition branch). See
+  [docs/canvas-engine.md](docs/canvas-engine.md).
 
 "Skip to canvas" in the top bar and "Save & continue to canvas" on step 3 both
 land on the canvas; "Back to setup" returns to step 1 with all state intact.
@@ -61,7 +69,15 @@ src/
     Step1Details.tsx           details & goals
     Step2Trigger.tsx           all three entry-trigger variants
     Step3Audience.tsx          audience + estimated reach
-    Canvas.tsx                 flow canvas with add-step palette + publish
+    Canvas.tsx                 thin adapter → src/canvas/JourneyCanvas
+  canvas/                      n8n-like React Flow editor
+    JourneyCanvas.tsx          engine wiring, toolbar, minimap, keyboard, DnD
+    useJourneyGraph.ts         graph state + named actions + undo/redo (choke point)
+    registry.ts                NodeKind registry (single place to add a kind)
+    NodePalette.tsx            searchable, draggable step palette
+    layout.ts                  dagre left-to-right "tidy up"
+    nodes/JourneyNodeView.tsx  custom node card + handles + NodeToolbar
+    edges/JourneyEdgeView.tsx  custom bezier edge + midpoint "+"
 prototype/
   journey-setup-prototype-appstorys-ui.html   approved standalone prototype
                                               (AppStorys light design system)

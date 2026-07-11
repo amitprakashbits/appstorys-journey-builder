@@ -33,26 +33,8 @@ export interface Rule {
 
 export type AudienceMode = 'all' | 'seg' | 'rules'
 
-export type NodeKind = 'story' | 'push' | 'cond' | 'delay'
-
-export interface FlowNode {
-  id: number
-  kind: NodeKind
-  title: string
-  meta: string
-}
-
-/* Data carried by each React Flow node. `isEntry` / `isTerminal` are derived
-   from the edge set on every render (never stored); `entryBadge` is the
-   wizard trigger summary, present only on the entry node. */
-export interface AppNodeData {
-  kind: NodeKind
-  title: string
-  meta: string
-  isEntry?: boolean
-  isTerminal?: boolean
-  entryBadge?: string
-}
+/* Canvas node/edge/graph types now live in src/canvas/types.ts (the React Flow
+   editor owns its own model). */
 
 export interface ToastState {
   msg: string
