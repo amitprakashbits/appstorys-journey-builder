@@ -1,4 +1,4 @@
-import type { Branch, CampaignBase, ConfigByKind, JourneyNodeConfig, NodeFamily, NodeKind } from './types'
+import type { Branch, CampaignBase, CardRow, ConfigByKind, JourneyNodeConfig, NodeFamily, NodeKind, Validity } from './types'
 
 export interface NodeTypeDef {
   kind: NodeKind
@@ -274,4 +274,189 @@ export function branchesFor(kind: NodeKind, config: JourneyNodeConfig): Branch[]
     return c.paths.map(p => ({ id: p.id, label: `${p.weight}%`, tone: 'neutral' as const }))
   }
   return []
+}
+
+/* ── card-data contract: rows shown on the canvas card ────────── */
+const sumWeights = (c: ConfigByKind['randomsplit']) => c.paths.reduce((s, p) => s + p.weight, 0)
+const setNone = (v: string): CardRow['tone'] => (v ? 'yes' : 'muted')
+
+/* type-specific rows for campaign kinds (source row is prepended by cardRows) */
+function campaignSettings(kind: NodeKind, config: JourneyNodeConfig): CardRow[] {
+  switch (kind) {
+    case 'animations':
+      return [{ k: 'Loop', v: (config as ConfigByKind['animations']).loop ? 'Yes' : 'No', tone: 'muted' }]
+    case 'bottomsheet': {
+      const c = config as ConfigByKind['bottomsheet']
+      return [{ k: 'Height', v: c.height === 'full' ? 'Full' : 'Half' }, { k: 'Dismiss', v: c.dismissible ? 'Yes' : 'No', tone: 'muted' }]
+    }
+    case 'carousel': {
+      const c = config as ConfigByKind['carousel']
+      return [{ k: 'Cards', v: String(c.cards) }, { k: 'Auto', v: c.autoplay ? 'Yes' : 'No', tone: 'muted' }]
+    }
+    case 'spotlight': {
+      const c = config as ConfigByKind['spotlight']
+      return [{ k: 'Anchor', v: c.anchor || '—', tone: c.anchor ? 'default' : 'muted' }, { k: 'Style', v: c.style }]
+    }
+    case 'floater': {
+      const c = config as ConfigByKind['floater']
+      return [{ k: 'Position', v: c.position === 'br' ? 'Bottom-right' : 'Bottom-left' }]
+    }
+    case 'gamification': {
+      const c = config as ConfigByKind['gamification']
+      return [{ k: 'Game', v: c.game }, { k: 'Reward', v: c.reward || '—', tone: c.reward ? 'default' : 'muted' }]
+    }
+    case 'modal': {
+      const c = config as ConfigByKind['modal']
+      return [{ k: 'Size', v: c.size.toUpperCase() }, { k: 'Dismiss', v: c.dismissible ? 'Yes' : 'No', tone: 'muted' }]
+    }
+    case 'pagepop':
+      return [{ k: 'Dismiss', v: (config as ConfigByKind['pagepop']).dismissible ? 'Yes' : 'No', tone: 'muted' }]
+    case 'pinnedbanner': {
+      const c = config as ConfigByKind['pinnedbanner']
+      return [{ k: 'Position', v: c.position === 'top' ? 'Top' : 'Bottom' }, { k: 'Dismiss', v: c.dismissible ? 'Yes' : 'No', tone: 'muted' }]
+    }
+    case 'tooltip': {
+      const c = config as ConfigByKind['tooltip']
+      return [{ k: 'Anchor', v: c.anchor || '—', tone: c.anchor ? 'default' : 'muted' }, { k: 'Placement', v: c.placement }]
+    }
+    case 'video': {
+      const c = config as ConfigByKind['video']
+      return [{ k: 'URL', v: c.url ? 'Set' : 'None', tone: setNone(c.url) }, { k: 'Autoplay', v: c.autoplay ? 'Yes' : 'No', tone: 'muted' }]
+    }
+    case 'widgets':
+      return [{ k: 'Widget', v: (config as ConfigByKind['widgets']).widgetId || '—', tone: (config as ConfigByKind['widgets']).widgetId ? 'default' : 'muted' }]
+    default:
+      return []
+  }
+}
+
+export function cardRows(kind: NodeKind, config: JourneyNodeConfig): CardRow[] {
+  if (NODE_TYPES[kind].family === 'campaign') {
+    const c = config as CampaignBase
+    const rows: CardRow[] = []
+    if (c.campaignId) rows.push({ k: 'Source', v: c.campaignName || NODE_TYPES[kind].name, tone: 'accent' })
+    rows.push(...campaignSettings(kind, config))
+    return rows.slice(0, 3)
+  }
+  switch (kind) {
+    case 'push': {
+      const c = config as ConfigByKind['push']
+      return [
+        { k: 'Priority', v: c.priority === 'high' ? 'High' : 'Normal', tone: c.priority === 'high' ? 'accent' : 'default' },
+        { k: 'Deep link', v: c.deepLink ? 'Set' : 'None', tone: setNone(c.deepLink) },
+      ]
+    }
+    case 'whatsapp': {
+      const c = config as ConfigByKind['whatsapp']
+      return [{ k: 'Template', v: c.templateId || '—', tone: c.templateId ? 'accent' : 'muted' }]
+    }
+    case 'email': {
+      const c = config as ConfigByKind['email']
+      return [
+        { k: 'Subject', v: c.subject || '—', tone: c.subject ? 'default' : 'muted' },
+        { k: 'Template', v: c.templateId || '—', tone: c.templateId ? 'default' : 'muted' },
+      ]
+    }
+    case 'sms': {
+      const c = config as ConfigByKind['sms']
+      return [{ k: 'Message', v: c.body ? `“${c.body.slice(0, 22)}${c.body.length > 22 ? '…' : ''}”` : '—', tone: c.body ? 'default' : 'muted' }]
+    }
+    case 'msg_seen':
+    case 'msg_clicked':
+    case 'msg_closed': {
+      const c = config as ConfigByKind['msg_seen']
+      return [
+        { k: 'Message', v: c.campaignName || '—', tone: c.campaignId ? 'accent' : 'muted' },
+        { k: 'Within', v: `${c.withinValue} ${c.withinUnit.toLowerCase()}`, tone: 'muted' },
+      ]
+    }
+    case 'path_optimizer': {
+      const c = config as ConfigByKind['path_optimizer']
+      return [{ k: 'Optimize', v: c.objective, tone: 'accent' }, { k: 'Arms', v: String(c.arms.length), tone: 'muted' }]
+    }
+    case 'check_attr': {
+      const c = config as ConfigByKind['check_attr']
+      return [{ k: 'If', v: c.attribute ? `${c.attribute} ${c.operator} ${c.value || '—'}` : '—', tone: c.attribute ? 'default' : 'muted' }]
+    }
+    case 'has_done_event': {
+      const c = config as ConfigByKind['has_done_event']
+      const has = c.event && c.event !== 'Select an event'
+      return [{ k: 'Event', v: has ? c.event : '—', tone: has ? 'accent' : 'muted' }, { k: 'Within', v: `${c.withinValue} ${c.withinUnit.toLowerCase()}`, tone: 'muted' }]
+    }
+    case 'cond': {
+      const c = config as ConfigByKind['cond']
+      const rows: CardRow[] = [{ k: 'If', v: `${c.rows[0].property} ${c.rows[0].operator} ${c.rows[0].value || '—'}` }]
+      if (c.rows.length > 1) rows.push({ k: '', v: `+${c.rows.length - 1} more rule${c.rows.length > 2 ? 's' : ''}`, tone: 'muted' })
+      return rows
+    }
+    case 'randomsplit':
+      return [{ k: 'Split', v: `${(config as ConfigByKind['randomsplit']).paths.length} variants`, tone: 'muted' }]
+    case 'delay': {
+      const c = config as ConfigByKind['delay']
+      return [
+        { k: 'Wait', v: `${c.amount} ${c.unit.toLowerCase()}`, tone: 'accent' },
+        { k: 'DND', v: c.respectDnd ? 'Respected' : 'Ignored', tone: 'muted' },
+      ]
+    }
+    case 'setattr': {
+      const c = config as ConfigByKind['setattr']
+      return [{ k: 'Set', v: c.attribute ? `${c.attribute} = ${c.value || '—'}` : 'No attribute', tone: c.attribute ? 'accent' : 'muted' }]
+    }
+    case 'segment': {
+      const c = config as ConfigByKind['segment']
+      return [{ k: c.action === 'add' ? 'Add to' : 'Remove from', v: c.segment || '—', tone: c.segment ? 'accent' : 'muted' }]
+    }
+    case 'jump': {
+      const c = config as ConfigByKind['jump']
+      return [{ k: 'Jump to', v: c.targetId ? 'a node' : '—', tone: c.targetId ? 'default' : 'muted' }]
+    }
+    default:
+      return [{ k: '', v: summarize(kind, config), tone: 'muted' }]
+  }
+}
+
+export function validity(kind: NodeKind, config: JourneyNodeConfig): Validity {
+  if (NODE_TYPES[kind].family === 'campaign') {
+    return (config as CampaignBase).campaignId ? { ok: true } : { ok: false, msg: 'Pick or create a campaign' }
+  }
+  switch (kind) {
+    case 'push':
+      return (config as ConfigByKind['push']).title ? { ok: true } : { ok: false, msg: 'Needs a title' }
+    case 'whatsapp':
+      return (config as ConfigByKind['whatsapp']).templateId ? { ok: true } : { ok: false, msg: 'Needs a template' }
+    case 'email':
+      return (config as ConfigByKind['email']).templateId ? { ok: true } : { ok: false, msg: 'Needs a template' }
+    case 'sms':
+      return (config as ConfigByKind['sms']).body ? { ok: true } : { ok: false, msg: 'Needs a message' }
+    case 'msg_seen':
+    case 'msg_clicked':
+    case 'msg_closed':
+      return (config as ConfigByKind['msg_seen']).campaignId ? { ok: true } : { ok: false, msg: 'Pick a message' }
+    case 'path_optimizer':
+      return (config as ConfigByKind['path_optimizer']).arms.length >= 2 ? { ok: true } : { ok: false, msg: 'Needs at least 2 paths' }
+    case 'check_attr': {
+      const c = config as ConfigByKind['check_attr']
+      return c.attribute ? { ok: true } : { ok: false, msg: 'Needs an attribute' }
+    }
+    case 'has_done_event': {
+      const c = config as ConfigByKind['has_done_event']
+      return c.event && c.event !== 'Select an event' ? { ok: true } : { ok: false, msg: 'Pick an event' }
+    }
+    case 'cond':
+      return (config as ConfigByKind['cond']).rows[0].value ? { ok: true } : { ok: false, msg: 'Complete the first rule' }
+    case 'randomsplit': {
+      const total = sumWeights(config as ConfigByKind['randomsplit'])
+      return total === 100 ? { ok: true } : { ok: false, msg: `Weights total ${total}%, must be 100%` }
+    }
+    case 'delay':
+      return (config as ConfigByKind['delay']).amount > 0 ? { ok: true } : { ok: false, msg: 'Set a wait time' }
+    case 'setattr':
+      return (config as ConfigByKind['setattr']).attribute ? { ok: true } : { ok: false, msg: 'Needs an attribute' }
+    case 'segment':
+      return (config as ConfigByKind['segment']).segment ? { ok: true } : { ok: false, msg: 'Pick a segment' }
+    case 'jump':
+      return (config as ConfigByKind['jump']).targetId ? { ok: true } : { ok: false, msg: 'Pick a target node' }
+    default:
+      return { ok: true }
+  }
 }

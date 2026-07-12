@@ -146,3 +146,12 @@ export interface Branch {
   label: string
   tone: 'yes' | 'no' | 'neutral'
 }
+
+/* card-data contract: a kind declares up to 3 key→value rows for its canvas card */
+export type CardTone = 'default' | 'accent' | 'yes' | 'no' | 'muted'
+export interface CardRow {
+  k: string // label ('' = full-width value)
+  v: string // short value; the card ellipsizes
+  tone?: CardTone
+}
+export type Validity = { ok: true } | { ok: false; msg: string }

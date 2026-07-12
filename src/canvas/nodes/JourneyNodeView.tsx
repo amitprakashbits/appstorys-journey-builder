@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { Handle, NodeToolbar, Position, useStore } from 'reactflow'
 import type { NodeProps } from 'reactflow'
-import { NODE_TYPES, branchesFor } from '../registry'
+import { NODE_TYPES, branchesFor, cardRows, validity } from '../registry'
 import { NodeGlyph } from '../icons'
 import { useCanvasContext } from '../context'
 import type { JourneyNodeData } from '../types'
@@ -33,12 +33,14 @@ function JourneyNodeViewBase({ id, data, selected }: NodeProps<JourneyNodeData>)
   const ctx = useCanvasContext()
   const isEntry = ctx.entryId === id
   const branches = branchesFor(data.kind, data.config)
+  const rows = cardRows(data.kind, data.config)
+  const valid = validity(data.kind, data.config)
 
   const outgoing = useStore(s => s.edges.filter(e => e.source === id).map(e => e.sourceHandle ?? '__single__'))
   const hasOut = (handle: string) => outgoing.includes(handle)
 
   return (
-    <div className={`node ${isEntry ? 'is-entry' : ''} ${selected ? 'is-selected' : ''}`}>
+    <div className={`node ${isEntry ? 'is-entry' : ''} ${selected ? 'is-selected' : ''} ${valid.ok ? '' : 'needs-setup'}`}>
       <NodeToolbar isVisible={selected} position={Position.Top} offset={8}>
         <div className="node-toolbar">
           <ToolbarBtn d={I.edit} label="Edit" onClick={() => ctx.onEditNode(id)} />
@@ -60,9 +62,20 @@ function JourneyNodeViewBase({ id, data, selected }: NodeProps<JourneyNodeData>)
           <NodeGlyph kind={data.kind} size={13} />
         </span>
         {def.name}
+        {!valid.ok && <span className="needs-dot" title={valid.msg} />}
       </div>
       <div className="node-title">{data.title}</div>
-      <div className="node-meta">{data.meta}</div>
+      {rows.length > 0 && (
+        <div className="node-rows">
+          {rows.map((r, i) => (
+            <div className="node-row" key={i}>
+              {r.k && <span className="node-row-k">{r.k}</span>}
+              <span className={`node-row-v tone-${r.tone ?? 'default'} ${r.k ? '' : 'full'}`}>{r.v}</span>
+            </div>
+          ))}
+        </div>
+      )}
+      {!valid.ok && <div className="node-needs">Needs setup — {valid.msg}</div>}
 
       {branches.length > 0 ? (
         <>
