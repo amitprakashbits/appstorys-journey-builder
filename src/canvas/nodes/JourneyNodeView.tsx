@@ -78,25 +78,20 @@ function JourneyNodeViewBase({ id, data, selected }: NodeProps<JourneyNodeData>)
       {!valid.ok && <div className="node-needs">Needs setup — {valid.msg}</div>}
 
       {branches.length > 0 ? (
-        <>
-          <div className="node-branches">
-            {branches.map(b => (
-              <span className={`branch-chip ${b.tone}`} key={b.id}>
-                {b.label}
-              </span>
-            ))}
-          </div>
-          {branches.map((b, i) => (
-            <Handle
-              key={b.id}
-              type="source"
-              id={b.id}
-              position={Position.Right}
-              className={`rf-handle source ${hasOut(b.id) ? '' : 'terminal'}`}
-              style={{ top: `${((i + 1) / (branches.length + 1)) * 100}%` }}
-            />
+        <div className="node-outs">
+          {branches.map(b => (
+            <div className="node-out" key={b.id}>
+              <span className={`branch-chip ${b.tone}`}>{b.label}</span>
+              <Handle
+                type="source"
+                id={b.id}
+                position={Position.Right}
+                className={`rf-handle source ${hasOut(b.id) ? '' : 'terminal'}`}
+                style={{ top: '50%', right: -25 }}
+              />
+            </div>
           ))}
-        </>
+        </div>
       ) : (
         <Handle type="source" position={Position.Right} className={`rf-handle source ${hasOut('__single__') ? '' : 'terminal'}`} />
       )}

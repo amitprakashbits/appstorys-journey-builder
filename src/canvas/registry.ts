@@ -278,6 +278,8 @@ export function branchesFor(kind: NodeKind, config: JourneyNodeConfig): Branch[]
 
 /* ── card-data contract: rows shown on the canvas card ────────── */
 const sumWeights = (c: ConfigByKind['randomsplit']) => c.paths.reduce((s, p) => s + p.weight, 0)
+/* "1 day" not "1 days" */
+const dur = (n: number, unit: string) => `${n} ${n === 1 ? unit.slice(0, -1).toLowerCase() : unit.toLowerCase()}`
 const setNone = (v: string): CardRow['tone'] => (v ? 'yes' : 'muted')
 
 /* type-specific rows for campaign kinds (source row is prepended by cardRows) */
@@ -367,7 +369,7 @@ export function cardRows(kind: NodeKind, config: JourneyNodeConfig): CardRow[] {
       const c = config as ConfigByKind['msg_seen']
       return [
         { k: 'Message', v: c.campaignName || '—', tone: c.campaignId ? 'accent' : 'muted' },
-        { k: 'Within', v: `${c.withinValue} ${c.withinUnit.toLowerCase()}`, tone: 'muted' },
+        { k: 'Within', v: dur(c.withinValue, c.withinUnit), tone: 'muted' },
       ]
     }
     case 'path_optimizer': {
@@ -383,7 +385,7 @@ export function cardRows(kind: NodeKind, config: JourneyNodeConfig): CardRow[] {
       const has = c.event && c.event !== 'Select an event'
       const rows: CardRow[] = [{ k: 'Event', v: has ? c.event : '—', tone: has ? 'accent' : 'muted' }]
       if (c.filters.length) rows.push({ k: 'Where', v: `${c.filters.length} attribute filter${c.filters.length > 1 ? 's' : ''}`, tone: 'muted' })
-      else rows.push({ k: 'Within', v: `${c.withinValue} ${c.withinUnit.toLowerCase()}`, tone: 'muted' })
+      else rows.push({ k: 'Within', v: dur(c.withinValue, c.withinUnit), tone: 'muted' })
       return rows
     }
     case 'cond': {
@@ -397,7 +399,7 @@ export function cardRows(kind: NodeKind, config: JourneyNodeConfig): CardRow[] {
     case 'delay': {
       const c = config as ConfigByKind['delay']
       return [
-        { k: 'Wait', v: `${c.amount} ${c.unit.toLowerCase()}`, tone: 'accent' },
+        { k: 'Wait', v: dur(c.amount, c.unit), tone: 'accent' },
         { k: 'DND', v: c.respectDnd ? 'Respected' : 'Ignored', tone: 'muted' },
       ]
     }
