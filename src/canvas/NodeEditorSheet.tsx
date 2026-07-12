@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react'
-import { NODE_TYPES, summarize } from './registry'
+import { NODE_TYPES, branchesFor, cardRows, summarize, validity } from './registry'
 import { NODE_EDITORS } from './editors'
 import { EditorEnvContext } from './editors/env'
 import type { NodeOption } from './editors/env'
@@ -29,6 +29,11 @@ export function NodeEditorSheet({ node, nodeOptions, onSave, onClose, onSendTest
 
   const Editor = NODE_EDITORS[node.data.kind] as EditorComponent
 
+  /* live, against the draft — the preview strip + status mirror the future card */
+  const rows = cardRows(node.data.kind, config)
+  const branches = branchesFor(node.data.kind, config)
+  const v = validity(node.data.kind, config)
+
   const requestClose = () => {
     if (dirty) setConfirming(true)
     else onClose()
@@ -51,11 +56,42 @@ export function NodeEditorSheet({ node, nodeOptions, onSave, onClose, onSendTest
               {def.name}
             </span>
           </div>
-          <span className="status">DRAFT</span>
+          <span className={`sheet-status ${v.ok ? 'ready' : 'needs'}`}>{v.ok ? 'READY' : 'NEEDS SETUP'}</span>
           <button className="sheet-x" aria-label="Close" onClick={requestClose}>
             ✕
           </button>
         </header>
+
+        <div className="sheet-preview">
+          <div className="sheet-preview-label">On the card</div>
+          <div className={`preview-card ${v.ok ? '' : 'needs-setup'}`}>
+            <div className="node-kind" style={{ color: def.color }}>
+              {def.name}
+              {!v.ok && <span className="needs-dot" />}
+            </div>
+            <div className="node-title">{title || def.name}</div>
+            {rows.length > 0 && (
+              <div className="node-rows">
+                {rows.map((r, i) => (
+                  <div className="node-row" key={i}>
+                    {r.k && <span className="node-row-k">{r.k}</span>}
+                    <span className={`node-row-v tone-${r.tone ?? 'default'} ${r.k ? '' : 'full'}`}>{r.v}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+            {branches.length > 0 && (
+              <div className="node-branches">
+                {branches.map(b => (
+                  <span className={`branch-chip ${b.tone}`} key={b.id}>
+                    {b.label}
+                  </span>
+                ))}
+              </div>
+            )}
+            {!v.ok && <div className="node-needs">Needs setup — {v.msg}</div>}
+          </div>
+        </div>
 
         <div className="sheet-actions">
           <button className="btn" onClick={onSendTest}>
