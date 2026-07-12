@@ -67,43 +67,23 @@ const ToggleField = (p: { label: string; sub?: string; checked: boolean; onChang
 function CampaignSource<C extends CampaignBase>({ config, onChange }: { config: C; onChange: (c: C) => void }) {
   return (
     <>
-      <Field label="Source">
-        <PillGroup
-          value={config.source}
-          options={[
-            { value: 'import', label: 'Import existing' },
-            { value: 'create', label: 'Create new' },
-          ]}
-          onChange={source =>
-            onChange(
-              source === 'create'
-                ? { ...config, source, campaignId: `c-new-${++seq}`, campaignName: '' }
-                : { ...config, source, campaignId: null, campaignName: '' },
-            )
-          }
-        />
+      <Field label="Campaign">
+        <select
+          className="select input-md"
+          value={config.campaignId ?? ''}
+          onChange={e => {
+            const c = CAMPAIGNS.find(x => x.id === e.target.value)
+            onChange({ ...config, source: 'import', campaignId: c?.id ?? null, campaignName: c?.name ?? '' })
+          }}
+        >
+          <option value="">Select a campaign…</option>
+          {CAMPAIGNS.map(c => (
+            <option key={c.id} value={c.id}>
+              {c.name}
+            </option>
+          ))}
+        </select>
       </Field>
-      {config.source === 'import' ? (
-        <Field label="Campaign">
-          <select
-            className="select input-md"
-            value={config.campaignId ?? ''}
-            onChange={e => {
-              const c = CAMPAIGNS.find(x => x.id === e.target.value)
-              onChange({ ...config, campaignId: c?.id ?? null, campaignName: c?.name ?? '' })
-            }}
-          >
-            <option value="">Select a campaign…</option>
-            {CAMPAIGNS.map(c => (
-              <option key={c.id} value={c.id}>
-                {c.name}
-              </option>
-            ))}
-          </select>
-        </Field>
-      ) : (
-        <TextField label="New campaign name" value={config.campaignName} placeholder="Name this campaign" onChange={v => onChange({ ...config, campaignName: v })} />
-      )}
       {config.campaignId && (
         <button
           className="add-link sm"
