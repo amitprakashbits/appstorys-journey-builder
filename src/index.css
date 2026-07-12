@@ -345,9 +345,9 @@ body {
 
 /* ports/handles — 18px forgiving hit area, 10px visual dot, n8n grab affordance */
 .react-flow__handle.rf-handle { width: 18px; height: 18px; min-width: 0; min-height: 0; border: none; background: transparent; border-radius: 50%; }
-.react-flow__handle.rf-handle::after { content: ''; position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; transform: translate(-50%, -50%); border-radius: 50%; background: #fff; border: 1.5px solid #D3D6DC; transition: width 0.15s, height 0.15s, background 0.15s, border-color 0.15s; }
-.react-flow__handle.rf-handle:hover::after { width: 14px; height: 14px; background: var(--brand); border-color: var(--brand); }
-.react-flow__handle.rf-handle.terminal::after { background: #C6CAD1; border-color: #C6CAD1; }
+.react-flow__handle.rf-handle::after { content: ''; position: absolute; top: 50%; left: 50%; width: 11px; height: 11px; transform: translate(-50%, -50%); border-radius: 50%; background: #fff; border: 1.75px solid #C2C7D0; box-sizing: border-box; transition: width 0.15s, height 0.15s, background 0.15s, border-color 0.15s; }
+.react-flow__handle.rf-handle:hover::after { width: 15px; height: 15px; background: var(--brand); border-color: var(--brand); }
+.react-flow__handle.rf-handle.terminal::after { background: #C2C7D0; border-color: #C2C7D0; }
 .react-flow__handle.rf-handle.connectingfrom::after,
 .react-flow__handle.rf-handle.connectingto::after { background: var(--brand); border-color: var(--brand); }
 
@@ -364,10 +364,14 @@ body {
 .canvas-shell.simulate .journey-edge { stroke-dasharray: 6 5; animation: dashflow 1.5s linear infinite; }
 @keyframes dashflow { to { stroke-dashoffset: -22; } }
 /* branch (Yes/No/arm) label sitting on the edge */
-.edge-branch { position: absolute; pointer-events: none; font-size: 10px; font-weight: 700; letter-spacing: 0.03em; padding: 2px 9px; border-radius: 6px; background: #fff; border: 1px solid var(--line); box-shadow: var(--shadow-sm); white-space: nowrap; }
-.edge-branch.yes { color: #067A57; border-color: var(--green-bd); }
-.edge-branch.no { color: #B42318; border-color: #FECDCA; }
-.edge-branch.neutral { color: #C2410C; border-color: var(--brand-border); }
+.edge-branch { position: absolute; pointer-events: none; display: inline-flex; align-items: center; gap: 6px; font-size: 10.5px; font-weight: 700; letter-spacing: 0.02em; padding: 3px 11px 3px 9px; border-radius: 20px; box-shadow: var(--shadow-sm); white-space: nowrap; }
+.edge-branch::before { content: ''; width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+.edge-branch.yes { color: #067A57; background: var(--green-bg); border: 1px solid var(--green-bd); }
+.edge-branch.yes::before { background: var(--green); }
+.edge-branch.no { color: #B42318; background: var(--red-bg); border: 1px solid #FECDCA; }
+.edge-branch.no::before { background: var(--red); }
+.edge-branch.neutral { color: #C2410C; background: var(--cream); border: 1px solid var(--brand-border); }
+.edge-branch.neutral::before { background: var(--brand); }
 .edge-plus-wrap { position: absolute; pointer-events: none; opacity: 0; transition: opacity 0.15s; }
 .edge-plus-wrap.show { opacity: 1; pointer-events: all; }
 .edge-plus { width: 26px; height: 26px; border-radius: 50%; border: none; background: var(--brand-grad); color: #fff; font-size: 15px; font-weight: 600; box-shadow: var(--shadow-md); display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s; }
@@ -508,7 +512,7 @@ body {
 @media (prefers-reduced-motion: reduce) {
   .react-flow__handle.rf-handle::after { transition: none; }
   .sheet, .sheet-scrim, .palette-scrim, .add-panel { animation: none; }
-  .react-flow__handle.rf-handle:hover::after { width: 10px; height: 10px; }
+  .react-flow__handle.rf-handle:hover::after { width: 11px; height: 11px; }
   .canvas-shell.simulate .journey-edge { animation: none; }
   .canvas-shell.tidying .react-flow__node { transition: none; }
   .edge-plus { transition: none; }
