@@ -2,6 +2,7 @@ import type { ReactNode } from 'react'
 import { PillGroup, Toggle } from '../../components/ui'
 import { EventPicker } from '../../components/EventPicker'
 import { EventFilters } from '../../components/EventFilters'
+import { CampaignPicker } from '../../components/CampaignPicker'
 import { newCondRow, newSplitPath } from '../registry'
 import { useEditorEnv } from './env'
 import type { CampaignBase, ConfigByKind, MsgCondConfig, NodeKind, OptArm } from '../types'
@@ -63,49 +64,31 @@ const ToggleField = (p: { label: string; sub?: string; checked: boolean; onChang
   </div>
 )
 
-/* create-or-import header shared by all campaign types */
-function CampaignSource<C extends CampaignBase>({ config, onChange }: { config: C; onChange: (c: C) => void }) {
+/* rich import-or-create campaign picker, shared by all campaign types */
+function CampaignSource<C extends CampaignBase>({ config, onChange, typeName }: { config: C; onChange: (c: C) => void; typeName: string }) {
   return (
-    <>
-      <Field label="Campaign">
-        <select
-          className="select input-md"
-          value={config.campaignId ?? ''}
-          onChange={e => {
-            const c = CAMPAIGNS.find(x => x.id === e.target.value)
-            onChange({ ...config, source: 'import', campaignId: c?.id ?? null, campaignName: c?.name ?? '' })
-          }}
-        >
-          <option value="">Select a campaign…</option>
-          {CAMPAIGNS.map(c => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-      </Field>
-      {config.campaignId && (
-        <button
-          className="add-link sm"
-          onClick={() => window.open(`/campaigns/${config.campaignId}?returnTo=journey-builder`, '_blank', 'noopener')}
-        >
-          Edit content in campaign flow →
-        </button>
-      )}
-    </>
+    <CampaignPicker
+      typeName={typeName}
+      selectedId={config.campaignId && !config.campaignId.startsWith('c-new') ? config.campaignId : null}
+      onImport={c => onChange({ ...config, source: 'import', campaignId: c.id, campaignName: c.name })}
+      onCreate={() => {
+        onChange({ ...config, source: 'create', campaignId: `c-new-${++seq}`, campaignName: `New ${typeName} campaign` })
+        window.open(`/campaigns/new?type=${encodeURIComponent(typeName)}&returnTo=journey-builder`, '_blank', 'noopener')
+      }}
+    />
   )
 }
 
 /* ── campaign editors ─────────────────────────────────────────── */
 const AnimationsEditor: EditorFor<'animations'> = ({ config, onChange }) => (
   <div className="editor-form">
-    <CampaignSource config={config} onChange={onChange} />
+    <CampaignSource config={config} onChange={onChange} typeName="Animations" />
     <ToggleField label="Loop animation" checked={config.loop} onChange={loop => onChange({ ...config, loop })} />
   </div>
 )
 const BottomSheetEditor: EditorFor<'bottomsheet'> = ({ config, onChange }) => (
   <div className="editor-form">
-    <CampaignSource config={config} onChange={onChange} />
+    <CampaignSource config={config} onChange={onChange} typeName="Bottom Sheet" />
     <Field label="Height">
       <PillGroup value={config.height} options={[{ value: 'half', label: 'Half' }, { value: 'full', label: 'Full' }]} onChange={height => onChange({ ...config, height })} />
     </Field>
@@ -114,7 +97,7 @@ const BottomSheetEditor: EditorFor<'bottomsheet'> = ({ config, onChange }) => (
 )
 const CarouselEditor: EditorFor<'carousel'> = ({ config, onChange }) => (
   <div className="editor-form">
-    <CampaignSource config={config} onChange={onChange} />
+    <CampaignSource config={config} onChange={onChange} typeName="Carousel" />
     <Field label="Cards">
       <input className="text-input input-sm" type="number" min={1} max={10} value={config.cards} onChange={e => onChange({ ...config, cards: Math.max(1, Number(e.target.value) || 1) })} />
     </Field>
@@ -123,7 +106,7 @@ const CarouselEditor: EditorFor<'carousel'> = ({ config, onChange }) => (
 )
 const SpotlightEditor: EditorFor<'spotlight'> = ({ config, onChange }) => (
   <div className="editor-form">
-    <CampaignSource config={config} onChange={onChange} />
+    <CampaignSource config={config} onChange={onChange} typeName="Element Spotlight" />
     <TextField label="Anchor element" value={config.anchor} placeholder="e.g. #invest-cta" onChange={anchor => onChange({ ...config, anchor })} />
     <Field label="Highlight style">
       <PillGroup value={config.style} options={[{ value: 'pulse', label: 'Pulse' }, { value: 'ring', label: 'Ring' }]} onChange={style => onChange({ ...config, style })} />
@@ -132,7 +115,7 @@ const SpotlightEditor: EditorFor<'spotlight'> = ({ config, onChange }) => (
 )
 const FloaterEditor: EditorFor<'floater'> = ({ config, onChange }) => (
   <div className="editor-form">
-    <CampaignSource config={config} onChange={onChange} />
+    <CampaignSource config={config} onChange={onChange} typeName="Floater" />
     <Field label="Position">
       <PillGroup value={config.position} options={[{ value: 'br', label: 'Bottom-right' }, { value: 'bl', label: 'Bottom-left' }]} onChange={position => onChange({ ...config, position })} />
     </Field>
@@ -141,14 +124,14 @@ const FloaterEditor: EditorFor<'floater'> = ({ config, onChange }) => (
 )
 const GamificationEditor: EditorFor<'gamification'> = ({ config, onChange }) => (
   <div className="editor-form">
-    <CampaignSource config={config} onChange={onChange} />
+    <CampaignSource config={config} onChange={onChange} typeName="Gamification" />
     <SelectField label="Game" value={config.game} options={['spin', 'scratch', 'slot']} onChange={v => onChange({ ...config, game: v as ConfigByKind['gamification']['game'] })} />
     <TextField label="Reward" value={config.reward} placeholder="₹100 cashback" onChange={reward => onChange({ ...config, reward })} />
   </div>
 )
 const ModalEditor: EditorFor<'modal'> = ({ config, onChange }) => (
   <div className="editor-form">
-    <CampaignSource config={config} onChange={onChange} />
+    <CampaignSource config={config} onChange={onChange} typeName="Modal" />
     <Field label="Size">
       <PillGroup value={config.size} options={[{ value: 'sm', label: 'S' }, { value: 'md', label: 'M' }, { value: 'lg', label: 'L' }]} onChange={size => onChange({ ...config, size })} />
     </Field>
@@ -157,13 +140,13 @@ const ModalEditor: EditorFor<'modal'> = ({ config, onChange }) => (
 )
 const PagePopEditor: EditorFor<'pagepop'> = ({ config, onChange }) => (
   <div className="editor-form">
-    <CampaignSource config={config} onChange={onChange} />
+    <CampaignSource config={config} onChange={onChange} typeName="Page Pop" />
     <ToggleField label="Dismissible" sub="Allow users to close the takeover." checked={config.dismissible} onChange={dismissible => onChange({ ...config, dismissible })} />
   </div>
 )
 const PinnedBannerEditor: EditorFor<'pinnedbanner'> = ({ config, onChange }) => (
   <div className="editor-form">
-    <CampaignSource config={config} onChange={onChange} />
+    <CampaignSource config={config} onChange={onChange} typeName="Pinned Banner" />
     <Field label="Position">
       <PillGroup value={config.position} options={[{ value: 'top', label: 'Top' }, { value: 'bottom', label: 'Bottom' }]} onChange={position => onChange({ ...config, position })} />
     </Field>
@@ -172,21 +155,21 @@ const PinnedBannerEditor: EditorFor<'pinnedbanner'> = ({ config, onChange }) => 
 )
 const TooltipEditor: EditorFor<'tooltip'> = ({ config, onChange }) => (
   <div className="editor-form">
-    <CampaignSource config={config} onChange={onChange} />
+    <CampaignSource config={config} onChange={onChange} typeName="Tooltip" />
     <TextField label="Anchor element" value={config.anchor} placeholder="e.g. #portfolio-tab" onChange={anchor => onChange({ ...config, anchor })} />
     <SelectField label="Placement" value={config.placement} options={['top', 'bottom', 'left', 'right']} onChange={v => onChange({ ...config, placement: v as ConfigByKind['tooltip']['placement'] })} />
   </div>
 )
 const VideoEditor: EditorFor<'video'> = ({ config, onChange }) => (
   <div className="editor-form">
-    <CampaignSource config={config} onChange={onChange} />
+    <CampaignSource config={config} onChange={onChange} typeName="Video" />
     <TextField label="Video URL" value={config.url} placeholder="https://…" onChange={url => onChange({ ...config, url })} />
     <ToggleField label="Autoplay" checked={config.autoplay} onChange={autoplay => onChange({ ...config, autoplay })} />
   </div>
 )
 const WidgetsEditor: EditorFor<'widgets'> = ({ config, onChange }) => (
   <div className="editor-form">
-    <CampaignSource config={config} onChange={onChange} />
+    <CampaignSource config={config} onChange={onChange} typeName="Widgets" />
     <TextField label="Widget id" value={config.widgetId} placeholder="home_portfolio_v2" onChange={widgetId => onChange({ ...config, widgetId })} />
   </div>
 )
