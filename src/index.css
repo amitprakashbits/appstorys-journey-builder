@@ -375,10 +375,13 @@ body {
 .edge-branch.no::before { background: var(--red); }
 .edge-branch.neutral { color: #C2410C; background: var(--cream); border: 1px solid var(--brand-border); }
 .edge-branch.neutral::before { background: var(--brand); }
-.edge-plus-wrap { position: absolute; pointer-events: none; opacity: 0; transition: opacity 0.15s; }
+.edge-plus-wrap { position: absolute; pointer-events: none; opacity: 0; transition: opacity 0.16s ease; }
 .edge-plus-wrap.show { opacity: 1; pointer-events: all; }
-.edge-plus { width: 26px; height: 26px; border-radius: 50%; border: none; background: var(--brand-grad); color: #fff; font-size: 15px; font-weight: 600; box-shadow: var(--shadow-md); display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s; }
-.edge-plus:hover { transform: scale(1.18); }
+/* subtle at rest: white affordance sitting in a clean gap on the edge line;
+   morphs to brand on hover with a scale-in when the edge is revealed */
+.edge-plus { width: 20px; height: 20px; border-radius: 50%; border: 1px solid var(--brand-border); background: #fff; color: var(--brand); font-size: 13px; font-weight: 700; line-height: 1; display: grid; place-items: center; box-shadow: 0 0 0 4px #FBFBFD, 0 1px 4px rgba(16, 24, 40, 0.12); transform: scale(0.55); transition: transform 0.18s cubic-bezier(0.2, 0.8, 0.2, 1), background 0.16s, color 0.16s, border-color 0.16s, box-shadow 0.16s; }
+.edge-plus-wrap.show .edge-plus { transform: scale(1); }
+.edge-plus-wrap.show .edge-plus:hover { transform: scale(1.16); background: var(--brand-grad); color: #fff; border-color: transparent; box-shadow: 0 0 0 4px #FBFBFD, 0 4px 12px var(--brand-shadow); }
 
 /* palette drag ghost (HTML5 setDragImage preview) */
 .node.drag-ghost { position: absolute; top: -1000px; left: -1000px; width: 200px; opacity: 0.6; transform: scale(0.6); pointer-events: none; }
