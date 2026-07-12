@@ -3,7 +3,8 @@ import { PillGroup, Toggle } from '../../components/ui'
 import { EventPicker } from '../../components/EventPicker'
 import { EventFilters } from '../../components/EventFilters'
 import { CampaignPicker } from '../../components/CampaignPicker'
-import { newCondRow, newSplitPath } from '../registry'
+import { newSplitPath } from '../registry'
+import { ConditionBuilder } from '../../components/ConditionBuilder'
 import { useEditorEnv } from './env'
 import type { CampaignBase, ConfigByKind, MsgCondConfig, NodeKind, OptArm } from '../types'
 
@@ -207,44 +208,20 @@ const SmsEditor: EditorFor<'sms'> = ({ config, onChange }) => (
 )
 
 /* ── branching editors ────────────────────────────────────────── */
-const CondEditor: EditorFor<'cond'> = ({ config, onChange }) => {
-  const setRow = (id: string, patch: Partial<ConfigByKind['cond']['rows'][number]>) =>
-    onChange({ ...config, rows: config.rows.map(r => (r.id === id ? { ...r, ...patch } : r)) })
-  return (
-    <div className="editor-form">
-      <label className="field-label">Match all of these</label>
-      {config.rows.map(r => (
-        <div className="cond-row" key={r.id}>
-          <select className="select input-sm" style={{ minWidth: 120 }} value={r.property} onChange={e => setRow(r.id, { property: e.target.value })}>
-            {PROPERTIES.map(p => (
-              <option key={p}>{p}</option>
-            ))}
-          </select>
-          <select className="select input-sm" style={{ width: 110, minWidth: 0 }} value={r.operator} onChange={e => setRow(r.id, { operator: e.target.value })}>
-            {OPERATORS.map(o => (
-              <option key={o}>{o}</option>
-            ))}
-          </select>
-          <input className="text-input input-sm" style={{ minWidth: 0 }} placeholder="Value" value={r.value} onChange={e => setRow(r.id, { value: e.target.value })} />
-          <button className="x" aria-label="Remove rule" onClick={() => config.rows.length > 1 && onChange({ ...config, rows: config.rows.filter(x => x.id !== r.id) })}>
-            ✕
-          </button>
-        </div>
-      ))}
-      <button className="add-link sm" onClick={() => onChange({ ...config, rows: [...config.rows, newCondRow()] })}>
-        ＋ Add rule (AND)
-      </button>
-      <div className="inline-fields" style={{ marginTop: 14 }}>
-        <Field label="YES branch label">
-          <input className="text-input input-sm" value={config.yesLabel} onChange={e => onChange({ ...config, yesLabel: e.target.value })} />
-        </Field>
-        <Field label="NO branch label">
-          <input className="text-input input-sm" value={config.noLabel} onChange={e => onChange({ ...config, noLabel: e.target.value })} />
-        </Field>
-      </div>
+const CondEditor: EditorFor<'cond'> = ({ config, onChange }) => (
+  <div className="editor-form">
+    <label className="field-label">Split users when</label>
+    <ConditionBuilder value={config.conditions} onChange={conditions => onChange({ ...config, conditions })} />
+    <div className="inline-fields" style={{ marginTop: 14 }}>
+      <Field label="YES branch label">
+        <input className="text-input input-sm" value={config.yesLabel} onChange={e => onChange({ ...config, yesLabel: e.target.value })} />
+      </Field>
+      <Field label="NO branch label">
+        <input className="text-input input-sm" value={config.noLabel} onChange={e => onChange({ ...config, noLabel: e.target.value })} />
+      </Field>
     </div>
-  )
-}
+  </div>
+)
 const RandomSplitEditor: EditorFor<'randomsplit'> = ({ config, onChange }) => {
   const total = config.paths.reduce((s, p) => s + p.weight, 0)
   const setPath = (id: string, patch: Partial<ConfigByKind['randomsplit']['paths'][number]>) =>

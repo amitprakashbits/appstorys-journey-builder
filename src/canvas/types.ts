@@ -1,5 +1,6 @@
 import type { Edge, Node } from 'reactflow'
 import type { EventFilter } from '../data/events'
+import type { Condition } from '../components/ConditionBuilder'
 
 /* ── node kinds ──────────────────────────────────────────────────
    Every kind has: a config shape (ConfigByKind), a registry entry
@@ -107,7 +108,7 @@ export interface ConfigByKind {
   check_attr: { attribute: string; operator: string; value: string }
   has_done_event: { event: string; withinValue: number; withinUnit: WithinUnit; filters: EventFilter[] }
 
-  cond: { rows: CondRow[]; yesLabel: string; noLabel: string }
+  cond: { conditions: Condition[]; yesLabel: string; noLabel: string }
   randomsplit: { paths: SplitPath[] }
 
   delay: { amount: number; unit: 'Minutes' | 'Hours' | 'Days'; respectDnd: boolean }

@@ -1,3 +1,4 @@
+import { newCondition } from '../components/ConditionBuilder'
 import type { Branch, CampaignBase, CardRow, ConfigByKind, JourneyNodeConfig, NodeFamily, NodeKind, Validity } from './types'
 
 export interface NodeTypeDef {
@@ -148,7 +149,7 @@ export function makeDefaultConfig(kind: NodeKind): JourneyNodeConfig {
     case 'has_done_event':
       return { event: 'Select an event', withinValue: 7, withinUnit: 'Days', filters: [] }
     case 'cond':
-      return { rows: [{ id: `r${++seq}`, property: 'KYC status', operator: 'is', value: 'Complete' }], yesLabel: 'YES', noLabel: 'NO' }
+      return { conditions: [newCondition()], yesLabel: 'YES', noLabel: 'NO' }
     case 'randomsplit':
       return {
         paths: [
@@ -173,9 +174,6 @@ export function makeDefaultConfig(kind: NodeKind): JourneyNodeConfig {
 
 export function newSplitPath(): ConfigByKind['randomsplit']['paths'][number] {
   return { id: `p${++seq}`, label: 'New path', weight: 0 }
-}
-export function newCondRow(): ConfigByKind['cond']['rows'][number] {
-  return { id: `r${++seq}`, property: 'Platform', operator: 'is', value: '' }
 }
 
 /* node-card meta line, derived from config. `kind` selects the shape. */
@@ -221,7 +219,7 @@ export function summarize(kind: NodeKind, config: JourneyNodeConfig): string {
     }
     case 'cond': {
       const c = config as ConfigByKind['cond']
-      return `${c.rows.length} rule${c.rows.length === 1 ? '' : 's'} · ${c.yesLabel} / ${c.noLabel}`
+      return `${c.conditions.length} condition${c.conditions.length === 1 ? '' : 's'} · ${c.yesLabel} / ${c.noLabel}`
     }
     case 'randomsplit': {
       const c = config as ConfigByKind['randomsplit']
@@ -390,8 +388,10 @@ export function cardRows(kind: NodeKind, config: JourneyNodeConfig): CardRow[] {
     }
     case 'cond': {
       const c = config as ConfigByKind['cond']
-      const rows: CardRow[] = [{ k: 'If', v: `${c.rows[0].property} ${c.rows[0].operator} ${c.rows[0].value || '—'}` }]
-      if (c.rows.length > 1) rows.push({ k: '', v: `+${c.rows.length - 1} more rule${c.rows.length > 2 ? 's' : ''}`, tone: 'muted' })
+      const first = c.conditions[0]
+      const label = first ? (first.mode === 'event' ? first.event || 'any event' : first.attribute || 'an attribute') : '—'
+      const rows: CardRow[] = [{ k: 'If', v: label, tone: first ? 'default' : 'muted' }]
+      if (c.conditions.length > 1) rows.push({ k: '', v: `+${c.conditions.length - 1} more condition${c.conditions.length > 2 ? 's' : ''}`, tone: 'muted' })
       return rows
     }
     case 'randomsplit':
@@ -447,8 +447,11 @@ export function validity(kind: NodeKind, config: JourneyNodeConfig): Validity {
       const c = config as ConfigByKind['has_done_event']
       return c.event && c.event !== 'Select an event' ? { ok: true } : { ok: false, msg: 'Pick an event' }
     }
-    case 'cond':
-      return (config as ConfigByKind['cond']).rows[0].value ? { ok: true } : { ok: false, msg: 'Complete the first rule' }
+    case 'cond': {
+      const c = config as ConfigByKind['cond']
+      const ok = c.conditions.some(cd => (cd.mode === 'event' ? cd.event : cd.attribute))
+      return ok ? { ok: true } : { ok: false, msg: 'Add a filter condition' }
+    }
     case 'randomsplit': {
       const total = sumWeights(config as ConfigByKind['randomsplit'])
       return total === 100 ? { ok: true } : { ok: false, msg: `Weights total ${total}%, must be 100%` }

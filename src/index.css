@@ -601,6 +601,27 @@ body {
 .camp-create-btn { flex-shrink: 0; background: var(--brand-grad); color: #fff; border: none; font-family: inherit; font-size: 13.5px; font-weight: 600; padding: 10px 18px; border-radius: 8px; display: inline-flex; align-items: center; gap: 7px; box-shadow: 0 4px 12px -3px var(--brand-shadow); }
 .camp-create-btn .plus { font-size: 15px; }
 
+/* ── ConditionBuilder (Event / Attribute filter) ──────────────── */
+.cond-builder { display: flex; flex-direction: column; gap: 14px; }
+.cb-card { background: #F8F9FB; border: 1px solid var(--line); border-radius: 12px; padding: 18px 20px; }
+.cb-top { display: flex; justify-content: space-between; align-items: center; }
+.cb-tabs { display: inline-flex; background: #fff; border: 1px solid var(--line); border-radius: 8px; padding: 3px; gap: 2px; }
+.cb-tabs button { border: none; background: none; font-family: inherit; font-size: 13.5px; font-weight: 500; color: var(--tx2); padding: 7px 20px; border-radius: 6px; transition: all 0.15s; }
+.cb-tabs button.on { background: var(--brand); color: #fff; font-weight: 600; }
+.cb-x { width: 30px; height: 30px; border: 1px solid var(--line); border-radius: 8px; background: #fff; color: var(--tx4); font-size: 12px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cb-x:hover { color: var(--red); border-color: #FECDCA; }
+.cb-x.sm { width: 34px; height: 34px; }
+.cb-row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; margin-top: 14px; }
+.cb-ctl { min-width: 0; height: 40px; }
+.cb-text { font-size: 13.5px; color: var(--tx2); white-space: nowrap; }
+.cb-prop { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 12px 0 0 26px; position: relative; }
+.cb-prop::before { content: ''; position: absolute; left: -16px; top: -12px; height: 33px; width: 14px; border-left: 1px solid #D3D6DC; border-bottom: 1px solid #D3D6DC; border-bottom-left-radius: 6px; }
+.cb-and { font-size: 13.5px; font-weight: 500; color: var(--tx2); }
+.cb-prop-actions { display: flex; align-items: center; gap: 14px; margin: 12px 0 0 26px; }
+.cb-and-btn { background: var(--brand); color: #fff; border: none; font-family: inherit; font-size: 13px; font-weight: 700; padding: 8px 18px; border-radius: 8px; }
+.cb-add-another { width: 100%; border: 1px dashed #C6CAD1; border-radius: 10px; padding: 14px; background: var(--bg); color: var(--tx3); font-family: inherit; font-size: 13.5px; font-weight: 500; transition: all 0.15s; }
+.cb-add-another:hover { border-color: var(--brand); color: var(--brand); background: var(--cream); }
+
 .spacer-8 { height: 8px; }
 .spacer-10 { height: 10px; }
 .spacer-14 { height: 14px; }
