@@ -280,7 +280,7 @@ body {
 .node.trigger .node-kind { color: var(--brand); }
 .node .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-.node-title { font-size: 13px; font-weight: 600; line-height: 1.4; color: var(--tx); }
+.node-title { font-size: 13.5px; font-weight: 600; line-height: 1.3; color: var(--tx); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .node-meta { font-size: 10.5px; color: var(--tx3); margin-top: 8px; line-height: 1.65; }
 .node-kind.k-story { color: var(--purple); }
 .node-kind.k-push { color: var(--blue); }
@@ -311,10 +311,18 @@ body {
 .node.is-selected { border: 1.5px solid var(--brand); background: var(--cream); box-shadow: var(--shadow-lg); }
 .node.needs-setup { border-color: #FCD9A8; }
 .node.needs-setup.is-selected, .node.needs-setup.is-entry { border-color: var(--brand); }
+.node:hover { border-color: var(--brand-border); }
+.node.is-selected:hover, .node.is-entry:hover { border-color: var(--brand); }
+/* icon-forward header: tile + eyebrow + title */
+.node-head { display: flex; align-items: center; gap: 11px; }
+.node-icon { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; flex-shrink: 0; }
+.node-icon svg { width: 18px; height: 18px; stroke: currentColor; }
+.node-head-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
+.node-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .node-kind .needs-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); margin-left: auto; flex-shrink: 0; }
 .node-entry-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brand); background: var(--cream); border: 1px solid var(--brand-border); border-radius: 20px; padding: 3px 9px; margin-bottom: 9px; }
 /* card-data rows — quiet at rest, tone-coloured values */
-.node-rows { margin-top: 9px; display: flex; flex-direction: column; gap: 4px; }
+.node-rows { margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 5px; }
 .node-row { display: flex; align-items: baseline; gap: 8px; font-size: 10.5px; line-height: 1.4; }
 .node-row-k { color: var(--tx4); font-weight: 500; white-space: nowrap; }
 .node-row-v { margin-left: auto; text-align: right; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 152px; }

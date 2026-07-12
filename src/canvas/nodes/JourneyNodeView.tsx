@@ -63,13 +63,17 @@ function JourneyNodeViewBase({ id, data, selected }: NodeProps<JourneyNodeData>)
           <span className="live-dot" /> {ctx.entryBadge}
         </div>
       )}
-      <div className="node-kind" style={{ color: def.color }}>
-        <span className="node-glyph">
-          <NodeGlyph kind={data.kind} size={13} />
+      <div className="node-head">
+        <span className="node-icon" style={{ color: def.color, background: `${def.color}18` }}>
+          <NodeGlyph kind={data.kind} size={18} />
         </span>
-        {def.name}
+        <div className="node-head-text">
+          <span className="node-eyebrow" style={{ color: def.color }}>
+            {def.name}
+          </span>
+          <span className="node-title">{data.title}</span>
+        </div>
       </div>
-      <div className="node-title">{data.title}</div>
       {rows.length > 0 && (
         <div className="node-rows">
           {rows.map((r, i) => (

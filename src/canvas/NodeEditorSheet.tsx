@@ -65,11 +65,17 @@ export function NodeEditorSheet({ node, nodeOptions, onSave, onClose, onSendTest
         <div className="sheet-preview">
           <div className="sheet-preview-label">On the card</div>
           <div className={`preview-card ${v.ok ? '' : 'needs-setup'}`}>
-            <div className="node-kind" style={{ color: def.color }}>
-              {def.name}
-              {!v.ok && <span className="needs-dot" />}
+            <div className="node-head">
+              <span className="node-icon" style={{ color: def.color, background: `${def.color}18` }}>
+                <NodeGlyph kind={node.data.kind} size={18} />
+              </span>
+              <div className="node-head-text">
+                <span className="node-eyebrow" style={{ color: def.color }}>
+                  {def.name}
+                </span>
+                <span className="node-title">{title || def.name}</span>
+              </div>
             </div>
-            <div className="node-title">{title || def.name}</div>
             {rows.length > 0 && (
               <div className="node-rows">
                 {rows.map((r, i) => (
