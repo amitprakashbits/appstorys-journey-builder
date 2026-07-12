@@ -138,7 +138,7 @@ export function useJourneyGraph(): JourneyGraph {
       const node = makeNode(kind, mid)
       setGraph(g => {
         const nodes = g.nodes
-          .map(n => (n.id !== a.id && n.position.x >= b.position.x ? { ...n, position: { ...n.position, x: n.position.x + 170 } } : n))
+          .map(n => (n.id !== a.id && n.position.y >= b.position.y ? { ...n, position: { ...n.position, y: n.position.y + 150 } } : n))
           .concat(node)
         const edges = g.edges
           .filter(e => e.id !== edgeId)

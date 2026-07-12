@@ -50,7 +50,13 @@ function JourneyNodeViewBase({ id, data, selected }: NodeProps<JourneyNodeData>)
         </div>
       </NodeToolbar>
 
-      <Handle type="target" position={Position.Left} className="rf-handle target" />
+      <Handle type="target" position={Position.Top} className="rf-handle target" />
+
+      {!valid.ok && (
+        <span className="node-err" title={`Needs setup — ${valid.msg}`}>
+          !
+        </span>
+      )}
 
       {isEntry && (
         <div className="node-entry-badge">
@@ -62,7 +68,6 @@ function JourneyNodeViewBase({ id, data, selected }: NodeProps<JourneyNodeData>)
           <NodeGlyph kind={data.kind} size={13} />
         </span>
         {def.name}
-        {!valid.ok && <span className="needs-dot" title={valid.msg} />}
       </div>
       <div className="node-title">{data.title}</div>
       {rows.length > 0 && (
@@ -75,25 +80,20 @@ function JourneyNodeViewBase({ id, data, selected }: NodeProps<JourneyNodeData>)
           ))}
         </div>
       )}
-      {!valid.ok && <div className="node-needs">Needs setup — {valid.msg}</div>}
 
       {branches.length > 0 ? (
-        <div className="node-outs">
-          {branches.map(b => (
-            <div className="node-out" key={b.id}>
-              <span className={`branch-chip ${b.tone}`}>{b.label}</span>
-              <Handle
-                type="source"
-                id={b.id}
-                position={Position.Right}
-                className={`rf-handle source ${hasOut(b.id) ? '' : 'terminal'}`}
-                style={{ top: '50%', right: -25 }}
-              />
-            </div>
-          ))}
-        </div>
+        branches.map((b, i) => (
+          <Handle
+            key={b.id}
+            type="source"
+            id={b.id}
+            position={Position.Bottom}
+            className={`rf-handle source ${hasOut(b.id) ? '' : 'terminal'}`}
+            style={{ left: `${((i + 1) / (branches.length + 1)) * 100}%` }}
+          />
+        ))
       ) : (
-        <Handle type="source" position={Position.Right} className={`rf-handle source ${hasOut('__single__') ? '' : 'terminal'}`} />
+        <Handle type="source" position={Position.Bottom} className={`rf-handle source ${hasOut('__single__') ? '' : 'terminal'}`} />
       )}
     </div>
   )

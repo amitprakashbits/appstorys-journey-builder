@@ -9,7 +9,7 @@ const NODE_H = 116
    sits above the NO edge (dagre visits edges in insertion order per rank). */
 export function layeredLayout(nodes: JourneyNode[], edges: JourneyEdge[]): Record<string, XYPosition> {
   const g = new dagre.graphlib.Graph()
-  g.setGraph({ rankdir: 'LR', nodesep: 44, ranksep: 96, marginx: 24, marginy: 24 })
+  g.setGraph({ rankdir: 'TB', nodesep: 60, ranksep: 90, marginx: 24, marginy: 24 })
   g.setDefaultEdgeLabel(() => ({}))
 
   nodes.forEach(n => g.setNode(n.id, { width: NODE_W, height: NODE_H }))

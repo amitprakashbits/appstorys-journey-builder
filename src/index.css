@@ -304,8 +304,10 @@ body {
 
 /* our .node card renders 1:1 inside the RF node wrapper */
 .react-flow__node-journey { width: 236px; }
-.node { transition: box-shadow 0.18s, border-color 0.18s; }
+.node { position: relative; transition: box-shadow 0.18s, border-color 0.18s; }
 .node.is-entry { border: 1.5px solid var(--brand); box-shadow: 0 8px 24px -8px var(--brand-shadow); }
+/* red "!" error badge on nodes needing setup */
+.node-err { position: absolute; top: -8px; right: -8px; width: 19px; height: 19px; border-radius: 50%; background: var(--red); color: #fff; font-size: 12px; font-weight: 800; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(16, 24, 40, 0.18); z-index: 3; }
 .node.is-selected { border: 1.5px solid var(--brand); background: var(--cream); box-shadow: var(--shadow-lg); }
 .node.needs-setup { border-color: #FCD9A8; }
 .node.needs-setup.is-selected, .node.needs-setup.is-entry { border-color: var(--brand); }
@@ -353,6 +355,11 @@ body {
 .journey-edge.is-drop-target { filter: drop-shadow(0 0 3px var(--brand-shadow)); stroke: var(--brand); }
 .canvas-shell.simulate .journey-edge { stroke-dasharray: 6 5; animation: dashflow 1.5s linear infinite; }
 @keyframes dashflow { to { stroke-dashoffset: -22; } }
+/* branch (Yes/No/arm) label sitting on the edge */
+.edge-branch { position: absolute; pointer-events: none; font-size: 10px; font-weight: 700; letter-spacing: 0.03em; padding: 2px 9px; border-radius: 6px; background: #fff; border: 1px solid var(--line); box-shadow: var(--shadow-sm); white-space: nowrap; }
+.edge-branch.yes { color: #067A57; border-color: var(--green-bd); }
+.edge-branch.no { color: #B42318; border-color: #FECDCA; }
+.edge-branch.neutral { color: #C2410C; border-color: var(--brand-border); }
 .edge-plus-wrap { position: absolute; pointer-events: none; opacity: 0; transition: opacity 0.15s; }
 .edge-plus-wrap.show { opacity: 1; pointer-events: all; }
 .edge-plus { width: 26px; height: 26px; border-radius: 50%; border: none; background: var(--brand-grad); color: #fff; font-size: 15px; font-weight: 600; box-shadow: var(--shadow-md); display: inline-flex; align-items: center; justify-content: center; transition: transform 0.15s; }

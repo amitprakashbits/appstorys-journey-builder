@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import ReactFlow, {
   Background,
   BackgroundVariant,
+  ConnectionLineType,
   MarkerType,
   MiniMap,
   ReactFlowProvider,
@@ -329,6 +330,7 @@ function CanvasInner(props: CanvasProps) {
               nodeTypes={nodeTypes}
               edgeTypes={edgeTypes}
               defaultEdgeOptions={defaultEdgeOptions}
+              connectionLineType={ConnectionLineType.SmoothStep}
               connectionLineStyle={connectionLineStyle}
               connectionRadius={24}
               edgesUpdatable
