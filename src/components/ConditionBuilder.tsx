@@ -33,9 +33,9 @@ const USER_ATTRS = ['risk_profile', 'kyc_status', 'app_theme', 'lifetime_value',
 let cseq = 7000
 const cid = () => `c${++cseq}`
 
-export const newCondition = (): Condition => ({
+export const newCondition = (mode: 'event' | 'attribute' = 'event'): Condition => ({
   id: cid(),
-  mode: 'event',
+  mode,
   verb: 'has executed',
   event: '',
   countOp: 'Greater than equal to',

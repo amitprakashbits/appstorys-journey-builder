@@ -1,7 +1,5 @@
 import type { ReactNode } from 'react'
 import { PillGroup, Toggle } from '../../components/ui'
-import { EventPicker } from '../../components/EventPicker'
-import { EventFilters } from '../../components/EventFilters'
 import { CampaignPicker } from '../../components/CampaignPicker'
 import { newSplitPath } from '../registry'
 import { ConditionBuilder } from '../../components/ConditionBuilder'
@@ -359,20 +357,16 @@ const PathOptimizerEditor: EditorFor<'path_optimizer'> = ({ config, onChange }) 
 /* ── user conditions ──────────────────────────────────────────── */
 const CheckAttrEditor: EditorFor<'check_attr'> = ({ config, onChange }) => (
   <div className="editor-form">
-    <SelectField label="Attribute" value={config.attribute} options={ATTRS} placeholder="Select an attribute…" onChange={attribute => onChange({ ...config, attribute })} />
-    <SelectField label="Operator" value={config.operator} options={OPERATORS} onChange={operator => onChange({ ...config, operator })} />
-    <TextField label="Value" value={config.value} placeholder="e.g. Complete" onChange={value => onChange({ ...config, value })} />
+    <label className="field-label">Condition is satisfied if</label>
+    <ConditionBuilder value={config.conditions} onChange={conditions => onChange({ conditions })} />
     <p className="editor-hint">Matching users take YES; the rest take NO.</p>
   </div>
 )
 const HasDoneEventEditor: EditorFor<'has_done_event'> = ({ config, onChange }) => (
   <div className="editor-form">
-    <Field label="Event">
-      <EventPicker value={config.event} onChange={event => onChange({ ...config, event, filters: [] })} />
-    </Field>
-    <EventFilters eventName={config.event} filters={config.filters} onChange={filters => onChange({ ...config, filters })} />
-    <WithinRow value={config.withinValue} unit={config.withinUnit} onValue={withinValue => onChange({ ...config, withinValue })} onUnit={withinUnit => onChange({ ...config, withinUnit })} />
-    <p className="editor-hint">Users who performed the event take YES; the rest take NO.</p>
+    <label className="field-label">User has done</label>
+    <ConditionBuilder value={config.conditions} onChange={conditions => onChange({ conditions })} />
+    <p className="editor-hint">Users who match take YES; the rest take NO.</p>
   </div>
 )
 

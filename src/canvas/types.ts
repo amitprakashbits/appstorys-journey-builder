@@ -1,5 +1,4 @@
 import type { Edge, Node } from 'reactflow'
-import type { EventFilter } from '../data/events'
 import type { Condition } from '../components/ConditionBuilder'
 
 /* ── node kinds ──────────────────────────────────────────────────
@@ -105,8 +104,8 @@ export interface ConfigByKind {
 
   path_optimizer: { objective: 'engagement' | 'conversion' | 'retention'; arms: OptArm[] }
 
-  check_attr: { attribute: string; operator: string; value: string }
-  has_done_event: { event: string; withinValue: number; withinUnit: WithinUnit; filters: EventFilter[] }
+  check_attr: { conditions: Condition[] }
+  has_done_event: { conditions: Condition[] }
 
   cond: { conditions: Condition[]; yesLabel: string; noLabel: string }
   randomsplit: { paths: SplitPath[] }

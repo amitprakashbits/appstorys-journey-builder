@@ -145,9 +145,9 @@ export function makeDefaultConfig(kind: NodeKind): JourneyNodeConfig {
         ],
       }
     case 'check_attr':
-      return { attribute: '', operator: 'is', value: '' }
+      return { conditions: [newCondition('attribute')] }
     case 'has_done_event':
-      return { event: 'Select an event', withinValue: 7, withinUnit: 'Days', filters: [] }
+      return { conditions: [newCondition('event')] }
     case 'cond':
       return { conditions: [newCondition()], yesLabel: 'YES', noLabel: 'NO' }
     case 'randomsplit':
@@ -197,11 +197,12 @@ export function summarize(kind: NodeKind, config: JourneyNodeConfig): string {
     }
     case 'check_attr': {
       const c = config as ConfigByKind['check_attr']
-      return c.attribute ? `${c.attribute} ${c.operator} ${c.value || '—'}` : 'No attribute'
+      const f = c.conditions[0]
+      return f?.attribute || f?.event || 'No condition'
     }
     case 'has_done_event': {
       const c = config as ConfigByKind['has_done_event']
-      return c.event && c.event !== 'Select an event' ? c.event : 'No event'
+      return c.conditions[0]?.event || 'No event'
     }
     case 'push':
       return `${(config as ConfigByKind['push']).priority === 'high' ? 'High' : 'Normal'} priority`
@@ -376,14 +377,18 @@ export function cardRows(kind: NodeKind, config: JourneyNodeConfig): CardRow[] {
     }
     case 'check_attr': {
       const c = config as ConfigByKind['check_attr']
-      return [{ k: 'If', v: c.attribute ? `${c.attribute} ${c.operator} ${c.value || '—'}` : '—', tone: c.attribute ? 'default' : 'muted' }]
+      const f = c.conditions[0]
+      const label = f ? (f.mode === 'attribute' ? f.attribute || 'an attribute' : f.event || 'an event') : '—'
+      const rows: CardRow[] = [{ k: 'If', v: label, tone: f ? 'default' : 'muted' }]
+      if (c.conditions.length > 1) rows.push({ k: '', v: `+${c.conditions.length - 1} more`, tone: 'muted' })
+      return rows
     }
     case 'has_done_event': {
       const c = config as ConfigByKind['has_done_event']
-      const has = c.event && c.event !== 'Select an event'
-      const rows: CardRow[] = [{ k: 'Event', v: has ? c.event : '—', tone: has ? 'accent' : 'muted' }]
-      if (c.filters.length) rows.push({ k: 'Where', v: `${c.filters.length} attribute filter${c.filters.length > 1 ? 's' : ''}`, tone: 'muted' })
-      else rows.push({ k: 'Within', v: dur(c.withinValue, c.withinUnit), tone: 'muted' })
+      const f = c.conditions[0]
+      const has = f && f.event
+      const rows: CardRow[] = [{ k: 'Event', v: has ? f.event : '—', tone: has ? 'accent' : 'muted' }]
+      if (c.conditions.length > 1) rows.push({ k: '', v: `+${c.conditions.length - 1} more`, tone: 'muted' })
       return rows
     }
     case 'cond': {
@@ -441,11 +446,13 @@ export function validity(kind: NodeKind, config: JourneyNodeConfig): Validity {
       return (config as ConfigByKind['path_optimizer']).arms.length >= 2 ? { ok: true } : { ok: false, msg: 'Needs at least 2 paths' }
     case 'check_attr': {
       const c = config as ConfigByKind['check_attr']
-      return c.attribute ? { ok: true } : { ok: false, msg: 'Needs an attribute' }
+      const ok = c.conditions.some(cd => (cd.mode === 'attribute' ? cd.attribute : cd.event))
+      return ok ? { ok: true } : { ok: false, msg: 'Add a condition' }
     }
     case 'has_done_event': {
       const c = config as ConfigByKind['has_done_event']
-      return c.event && c.event !== 'Select an event' ? { ok: true } : { ok: false, msg: 'Pick an event' }
+      const ok = c.conditions.some(cd => cd.event || cd.attribute)
+      return ok ? { ok: true } : { ok: false, msg: 'Pick an event' }
     }
     case 'cond': {
       const c = config as ConfigByKind['cond']
