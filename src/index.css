@@ -519,6 +519,11 @@ body {
 .event-row-name { font-size: 12.5px; font-weight: 600; color: var(--tx); }
 .event-row-desc { font-size: 10.5px; color: var(--tx3); }
 
+/* event attribute filters — nested under the selected event */
+.event-filters { margin: 8px 0 4px; padding-left: 12px; border-left: 2px solid var(--brand-border); }
+.event-filter-row .cond-verb { color: var(--tx4); font-weight: 500; }
+.editor-form .event-filters { border-left-color: var(--line); }
+
 /* ── SegmentSelect (active-cohort droplist) ───────────────────── */
 .segment-select { position: relative; }
 .seg-chip { cursor: pointer; }

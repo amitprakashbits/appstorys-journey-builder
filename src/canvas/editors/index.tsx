@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { PillGroup, Toggle } from '../../components/ui'
 import { EventPicker } from '../../components/EventPicker'
+import { EventFilters } from '../../components/EventFilters'
 import { newCondRow, newSplitPath } from '../registry'
 import { useEditorEnv } from './env'
 import type { CampaignBase, ConfigByKind, MsgCondConfig, NodeKind, OptArm } from '../types'
@@ -427,8 +428,9 @@ const CheckAttrEditor: EditorFor<'check_attr'> = ({ config, onChange }) => (
 const HasDoneEventEditor: EditorFor<'has_done_event'> = ({ config, onChange }) => (
   <div className="editor-form">
     <Field label="Event">
-      <EventPicker value={config.event} onChange={event => onChange({ ...config, event })} />
+      <EventPicker value={config.event} onChange={event => onChange({ ...config, event, filters: [] })} />
     </Field>
+    <EventFilters eventName={config.event} filters={config.filters} onChange={filters => onChange({ ...config, filters })} />
     <WithinRow value={config.withinValue} unit={config.withinUnit} onValue={withinValue => onChange({ ...config, withinValue })} onUnit={withinUnit => onChange({ ...config, withinUnit })} />
     <p className="editor-hint">Users who performed the event take YES; the rest take NO.</p>
   </div>

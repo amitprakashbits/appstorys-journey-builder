@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { Card, Radio, RadioRail, TimeGroup, TimezoneSelect, ToggleRow } from './ui'
 import { EventPicker } from './EventPicker'
+import { EventFilters } from './EventFilters'
 import type { RailItem } from './ui'
 import type { EventCondition, ExitCondition, FixedSchedule, TriggerType } from '../types'
 
@@ -201,12 +202,17 @@ function EventPanel(props: {
                 <span className="cond-verb">Has executed</span>
                 <EventPicker
                   value={c.event}
-                  onChange={name => props.setConds(props.conds.map(x => (x.id === c.id ? { ...x, event: name } : x)))}
+                  onChange={name => props.setConds(props.conds.map(x => (x.id === c.id ? { ...x, event: name, filters: [] } : x)))}
                 />
                 <button className="x" aria-label="Remove condition" onClick={() => remove(c.id)}>
                   ✕
                 </button>
               </div>
+              <EventFilters
+                eventName={c.event}
+                filters={c.filters ?? []}
+                onChange={f => props.setConds(props.conds.map(x => (x.id === c.id ? { ...x, filters: f } : x)))}
+              />
             </React.Fragment>
           ))}
           <button

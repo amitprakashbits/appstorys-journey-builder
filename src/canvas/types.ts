@@ -1,4 +1,5 @@
 import type { Edge, Node } from 'reactflow'
+import type { EventFilter } from '../data/events'
 
 /* ── node kinds ──────────────────────────────────────────────────
    Every kind has: a config shape (ConfigByKind), a registry entry
@@ -104,7 +105,7 @@ export interface ConfigByKind {
   path_optimizer: { objective: 'engagement' | 'conversion' | 'retention'; arms: OptArm[] }
 
   check_attr: { attribute: string; operator: string; value: string }
-  has_done_event: { event: string; withinValue: number; withinUnit: WithinUnit }
+  has_done_event: { event: string; withinValue: number; withinUnit: WithinUnit; filters: EventFilter[] }
 
   cond: { rows: CondRow[]; yesLabel: string; noLabel: string }
   randomsplit: { paths: SplitPath[] }

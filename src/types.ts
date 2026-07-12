@@ -1,4 +1,5 @@
 /* ── Journey setup wizard — shared model ─────────────────────────── */
+import type { EventFilter } from './data/events'
 
 export type StepId = 1 | 2 | 3 | 'canvas'
 
@@ -16,6 +17,7 @@ export interface Goal {
 export interface EventCondition {
   id: number
   event: string
+  filters?: EventFilter[]
 }
 
 export interface ExitCondition {

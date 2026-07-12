@@ -146,7 +146,7 @@ export function makeDefaultConfig(kind: NodeKind): JourneyNodeConfig {
     case 'check_attr':
       return { attribute: '', operator: 'is', value: '' }
     case 'has_done_event':
-      return { event: 'Select an event', withinValue: 7, withinUnit: 'Days' }
+      return { event: 'Select an event', withinValue: 7, withinUnit: 'Days', filters: [] }
     case 'cond':
       return { rows: [{ id: `r${++seq}`, property: 'KYC status', operator: 'is', value: 'Complete' }], yesLabel: 'YES', noLabel: 'NO' }
     case 'randomsplit':
@@ -381,7 +381,10 @@ export function cardRows(kind: NodeKind, config: JourneyNodeConfig): CardRow[] {
     case 'has_done_event': {
       const c = config as ConfigByKind['has_done_event']
       const has = c.event && c.event !== 'Select an event'
-      return [{ k: 'Event', v: has ? c.event : '—', tone: has ? 'accent' : 'muted' }, { k: 'Within', v: `${c.withinValue} ${c.withinUnit.toLowerCase()}`, tone: 'muted' }]
+      const rows: CardRow[] = [{ k: 'Event', v: has ? c.event : '—', tone: has ? 'accent' : 'muted' }]
+      if (c.filters.length) rows.push({ k: 'Where', v: `${c.filters.length} attribute filter${c.filters.length > 1 ? 's' : ''}`, tone: 'muted' })
+      else rows.push({ k: 'Within', v: `${c.withinValue} ${c.withinUnit.toLowerCase()}`, tone: 'muted' })
+      return rows
     }
     case 'cond': {
       const c = config as ConfigByKind['cond']
