@@ -104,6 +104,9 @@ body {
 .main { flex: 1; overflow-y: auto; padding: 22px 28px 96px; }
 .screen { max-width: 1120px; margin: 0 auto; animation: fadeUp 0.3s ease; }
 .screen.canvas-screen { max-width: none; }
+/* full-bleed canvas: no white gutter, toolbar becomes a top bar */
+.main.canvas-mode { padding: 0; overflow: hidden; }
+.main.canvas-mode .canvas-screen { height: 100%; margin: 0; display: flex; flex-direction: column; animation: none; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
 
 .card { background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); padding: 20px 24px; margin-bottom: 16px; box-shadow: var(--shadow-sm); }
@@ -267,12 +270,12 @@ body {
 .btn.primary:hover { filter: brightness(1.06); }
 
 /* ============ CANVAS ============ */
-.canvas-toolbar { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.canvas-toolbar { display: flex; align-items: center; gap: 12px; padding: 11px 20px; border-bottom: 1px solid var(--line); background: var(--surface); flex-shrink: 0; }
 .canvas-toolbar .status { font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; padding: 4px 11px; border-radius: 20px; background: var(--amber-bg); color: #92400E; border: 1px solid #FDE68A; }
 .canvas-toolbar .status.live { background: var(--green-bg); color: #067A57; border-color: var(--green-bd); }
 .canvas-toolbar .spacer { flex: 1; }
 .canvas-toolbar .cname { font-weight: 600; font-size: 14px; }
-.canvas-shell { background: #FBFBFD; border: 1px solid var(--line); border-radius: var(--radius); height: calc(100vh - 232px); min-height: 440px; position: relative; overflow: hidden; box-shadow: inset 0 1px 3px rgba(16, 24, 40, 0.04); }
+.canvas-shell { flex: 1; background: #FBFBFD; position: relative; overflow: hidden; min-height: 0; }
 .chain { display: flex; align-items: center; padding: 56px 44px; overflow-x: auto; height: 100%; }
 .node { width: 232px; flex-shrink: 0; background: #fff; border: 1px solid var(--line); border-radius: 12px; padding: 14px 16px; animation: fadeUp 0.3s ease; box-shadow: var(--shadow-md); }
 .node.trigger { border: 1.5px solid var(--brand); box-shadow: 0 8px 24px -8px var(--brand-shadow); }

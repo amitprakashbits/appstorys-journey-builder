@@ -137,7 +137,7 @@ export default function App() {
           </div>
         )}
 
-        <main className="main" ref={mainRef}>
+        <main className={`main ${isCanvas ? 'canvas-mode' : ''}`} ref={mainRef}>
           {step === 1 && (
             <div className="screen">
               <Step1Details name={journeyName} setName={setJourneyName} goals={goals} setGoals={setGoals} toast={toast} />
