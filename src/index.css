@@ -307,7 +307,8 @@ body {
 
 /* our .node card renders 1:1 inside the RF node wrapper */
 .react-flow__node-journey { width: 236px; }
-.node { position: relative; transition: box-shadow 0.18s, border-color 0.18s; }
+.node { position: relative; box-shadow: 0 2px 6px -2px rgba(16, 24, 40, 0.08), 0 8px 20px -10px rgba(16, 24, 40, 0.12); transition: box-shadow 0.2s ease, border-color 0.18s ease, transform 0.18s ease; }
+.node:hover { box-shadow: 0 8px 26px -8px rgba(16, 24, 40, 0.18); transform: translateY(-1px); }
 .node.is-entry { border: 1.5px solid var(--brand); box-shadow: 0 8px 24px -8px var(--brand-shadow); }
 /* red "!" error badge on nodes needing setup */
 .node-err { position: absolute; top: -8px; right: -8px; width: 19px; height: 19px; border-radius: 50%; background: var(--red); color: #fff; font-size: 12px; font-weight: 800; line-height: 1; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 6px rgba(16, 24, 40, 0.18); z-index: 3; }
@@ -441,7 +442,7 @@ body {
 /* ── node editor sheet ────────────────────────────────────────── */
 .sheet-scrim { position: absolute; inset: 0; z-index: 20; display: flex; justify-content: flex-end; background: rgba(16, 24, 40, 0.12); animation: scrimIn 0.15s ease; }
 @keyframes scrimIn { from { opacity: 0; } }
-.sheet { width: 384px; max-width: 92%; height: 100%; background: #fff; box-shadow: var(--shadow-lg); display: flex; flex-direction: column; animation: sheetIn 0.22s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.sheet { width: 384px; max-width: 92%; height: 100%; background: #fff; box-shadow: -16px 0 48px -12px rgba(16, 24, 40, 0.22), -4px 0 12px -6px rgba(16, 24, 40, 0.1); display: flex; flex-direction: column; animation: sheetIn 0.24s cubic-bezier(0.2, 0.8, 0.2, 1); }
 @keyframes sheetIn { from { transform: translateX(24px); opacity: 0.4; } }
 .sheet-head { display: flex; align-items: center; gap: 11px; padding: 16px 18px; border-bottom: 1px solid var(--line); }
 .sheet-kind-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
@@ -486,7 +487,7 @@ body {
 
 /* ── "Add to journey" palette modal ───────────────────────────── */
 .palette-scrim { position: absolute; inset: 0; z-index: 22; background: rgba(16, 24, 40, 0.16); display: flex; align-items: center; justify-content: center; padding: 24px; animation: scrimIn 0.15s ease; }
-.add-panel { width: 760px; max-width: 100%; max-height: min(540px, calc(100% - 8px)); background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: var(--shadow-lg); display: flex; flex-direction: column; overflow: hidden; animation: panelIn 0.18s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.add-panel { width: 760px; max-width: 100%; max-height: min(540px, calc(100% - 8px)); background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 28px 64px -16px rgba(16, 24, 40, 0.32), 0 8px 24px -8px rgba(16, 24, 40, 0.12); display: flex; flex-direction: column; overflow: hidden; animation: panelIn 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
 @keyframes panelIn { from { transform: translateY(10px) scale(0.99); opacity: 0.5; } }
 .add-panel-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 18px 22px 0; }
 .add-panel-head h2 { font-size: 18px; font-weight: 700; margin: 0; color: var(--tx); }
@@ -507,8 +508,8 @@ body {
 .add-grid-wrap { padding: 15px 18px; overflow-y: auto; }
 .add-grid-head { font-size: 10.5px; font-weight: 700; letter-spacing: 0.06em; color: var(--tx4); margin-bottom: 11px; }
 .add-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 9px; align-content: start; }
-.add-card { display: flex; align-items: flex-start; gap: 11px; text-align: left; padding: 11px 12px; background: #fff; border: 1px solid var(--line); border-radius: 11px; transition: all 0.15s; }
-.add-card:hover, .add-card.active { border-color: var(--brand-border); box-shadow: var(--shadow-sm); background: var(--cream); }
+.add-card { display: flex; align-items: flex-start; gap: 11px; text-align: left; padding: 11px 12px; background: #fff; border: 1px solid var(--line); border-radius: 11px; transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s, background 0.15s; }
+.add-card:hover, .add-card.active { border-color: var(--brand-border); box-shadow: 0 6px 16px -6px rgba(16, 24, 40, 0.14); background: var(--cream); transform: translateY(-1px); }
 .add-card-icon { width: 32px; height: 32px; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .add-card-icon svg { width: 17px; height: 17px; stroke: currentColor; }
 .add-card-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
@@ -522,6 +523,7 @@ body {
   .canvas-shell.simulate .journey-edge { animation: none; }
   .canvas-shell.tidying .react-flow__node { transition: none; }
   .edge-plus { transition: none; }
+  .node:hover, .add-card:hover, .add-card.active { transform: none; }
 }
 
 .toast { position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%) translateY(16px); background: #1C1C28; border-radius: 10px; padding: 11px 18px; font-size: 12.5px; font-weight: 500; color: #fff; opacity: 0; pointer-events: none; transition: all 0.3s ease; z-index: 200; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 9px; }

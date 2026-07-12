@@ -28,9 +28,10 @@ function JourneyEdgeViewBase(props: EdgeProps<JourneyEdgeData>) {
         path={path}
         markerEnd={markerEnd}
         style={{
-          stroke: isDropTarget ? '#FB6514' : CONNECTOR,
-          strokeWidth: isDropTarget ? 3 : selected ? 2.5 : 2,
-          filter: isDropTarget ? 'drop-shadow(0 0 3px rgba(253,95,3,.30))' : undefined,
+          stroke: isDropTarget || hovered || selected ? '#FB6514' : CONNECTOR,
+          strokeWidth: isDropTarget ? 3.25 : hovered || selected ? 2.75 : 2,
+          filter: isDropTarget || hovered || selected ? 'drop-shadow(0 1px 3px rgba(253,95,3,.28))' : undefined,
+          transition: 'stroke 0.15s ease, stroke-width 0.15s ease, filter 0.15s ease',
         }}
       />
       {/* wide invisible hit path so hovering the thin edge is forgiving */}
