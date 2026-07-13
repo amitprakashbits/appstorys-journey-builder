@@ -283,7 +283,7 @@ body {
 .node.trigger .node-kind { color: var(--brand); }
 .node .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); animation: pulse 2s infinite; }
 @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.35; } }
-.node-title { font-size: 13.5px; font-weight: 600; line-height: 1.3; color: var(--tx); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.node-title { font-size: 14px; font-weight: 600; line-height: 1.3; color: var(--tx); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; letter-spacing: -0.01em; }
 .node-meta { font-size: 10.5px; color: var(--tx3); margin-top: 8px; line-height: 1.65; }
 .node-kind.k-story { color: var(--purple); }
 .node-kind.k-push { color: var(--blue); }
@@ -319,7 +319,7 @@ body {
 .node.is-selected:hover, .node.is-entry:hover { border-color: var(--brand); }
 /* icon-forward header: tile + eyebrow + title */
 .node-head { display: flex; align-items: center; gap: 11px; }
-.node-icon { width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; flex-shrink: 0; }
+.node-icon { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; flex-shrink: 0; box-shadow: inset 0 0 0 1px rgba(16, 24, 40, 0.03), 0 1px 3px rgba(16, 24, 40, 0.06); }
 .node-icon svg { width: 18px; height: 18px; stroke: currentColor; }
 .node-head-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; flex: 1; }
 .node-eyebrow { font-size: 9px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
@@ -327,7 +327,7 @@ body {
 .node-entry-badge { display: inline-flex; align-items: center; gap: 6px; font-size: 9.5px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--brand); background: var(--cream); border: 1px solid var(--brand-border); border-radius: 20px; padding: 3px 9px; margin-bottom: 9px; }
 /* card-data rows — quiet at rest, tone-coloured values */
 .node-rows { margin-top: 11px; padding-top: 10px; border-top: 1px solid var(--line-soft); display: flex; flex-direction: column; gap: 5px; }
-.node-row { display: flex; align-items: baseline; gap: 8px; font-size: 10.5px; line-height: 1.4; }
+.node-row { display: flex; align-items: baseline; gap: 8px; font-size: 11px; line-height: 1.5; }
 .node-row-k { color: var(--tx4); font-weight: 500; white-space: nowrap; }
 .node-row-v { margin-left: auto; text-align: right; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; max-width: 152px; }
 .node-row-v.full { margin-left: 0; text-align: left; font-weight: 500; }
@@ -364,6 +364,9 @@ body {
 
 /* edges */
 .journey-edge { transition: stroke-width 0.15s; }
+/* animated flow packets travelling along every connection */
+.edge-flow { stroke: #fff; stroke-width: 2.5; stroke-dasharray: 1.5 12; stroke-linecap: round; opacity: 0.92; pointer-events: none; animation: edgeflow 0.85s linear infinite; }
+@keyframes edgeflow { to { stroke-dashoffset: -13.5; } }
 .journey-edge.is-drop-target { filter: drop-shadow(0 0 3px var(--brand-shadow)); stroke: var(--brand); }
 .canvas-shell.simulate .journey-edge { stroke-dasharray: 6 5; animation: dashflow 1.5s linear infinite; }
 @keyframes dashflow { to { stroke-dashoffset: -22; } }
@@ -524,6 +527,7 @@ body {
   .canvas-shell.tidying .react-flow__node { transition: none; }
   .edge-plus { transition: none; }
   .node:hover, .add-card:hover, .add-card.active { transform: none; }
+  .edge-flow { animation: none; opacity: 0; }
 }
 
 .toast { position: fixed; bottom: 78px; left: 50%; transform: translateX(-50%) translateY(16px); background: #1C1C28; border-radius: 10px; padding: 11px 18px; font-size: 12.5px; font-weight: 500; color: #fff; opacity: 0; pointer-events: none; transition: all 0.3s ease; z-index: 200; box-shadow: var(--shadow-lg); display: flex; align-items: center; gap: 9px; }

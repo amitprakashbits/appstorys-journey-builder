@@ -34,6 +34,9 @@ function JourneyEdgeViewBase(props: EdgeProps<JourneyEdgeData>) {
           transition: 'stroke 0.15s ease, stroke-width 0.15s ease, filter 0.15s ease',
         }}
       />
+      {/* animated flow — small light packets travelling along the connector */}
+      <path className="edge-flow" d={path} fill="none" />
+
       {/* wide invisible hit path so hovering the thin edge is forgiving */}
       <path
         d={path}
