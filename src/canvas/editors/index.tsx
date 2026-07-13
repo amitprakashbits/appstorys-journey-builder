@@ -1,6 +1,7 @@
 import type { ReactNode } from 'react'
 import { PillGroup, Toggle } from '../../components/ui'
 import { CampaignPicker } from '../../components/CampaignPicker'
+import { EventPicker } from '../../components/EventPicker'
 import { newSplitPath } from '../registry'
 import { ConditionBuilder } from '../../components/ConditionBuilder'
 import { useEditorEnv } from './env'
@@ -244,6 +245,53 @@ const RandomSplitEditor: EditorFor<'randomsplit'> = ({ config, onChange }) => {
   )
 }
 
+/* ── experiments ──────────────────────────────────────────────── */
+const AbTestEditor: EditorFor<'abtest'> = ({ config, onChange }) => {
+  const total = config.variants.reduce((s, v) => s + v.weight, 0)
+  const setVar = (id: string, patch: Partial<ConfigByKind['abtest']['variants'][number]>) =>
+    onChange({ ...config, variants: config.variants.map(v => (v.id === id ? { ...v, ...patch } : v)) })
+  const distribute = () => {
+    const n = config.variants.length
+    const base = Math.floor(100 / n)
+    onChange({ ...config, variants: config.variants.map((v, i) => ({ ...v, weight: base + (i < 100 - base * n ? 1 : 0) })) })
+  }
+  return (
+    <div className="editor-form">
+      <div className="ab-head">
+        <label className="field-label" style={{ marginBottom: 0 }}>
+          Variants {total !== 100 && <span style={{ color: 'var(--amber)' }}>· {total}%</span>}
+        </label>
+        <button className="add-link sm" onClick={distribute}>
+          Distribute evenly
+        </button>
+      </div>
+      {config.variants.map(v => (
+        <div className="cond-row" key={v.id}>
+          <input className="text-input input-sm" style={{ minWidth: 0, flex: 1 }} value={v.label} onChange={e => setVar(v.id, { label: e.target.value })} />
+          <input className="text-input input-sm" type="number" min={0} max={100} style={{ width: 74 }} value={v.weight} onChange={e => setVar(v.id, { weight: Math.max(0, Math.min(100, Number(e.target.value) || 0)) })} />
+          <span className="cond-verb">%</span>
+          <button className="x" aria-label="Remove variant" onClick={() => config.variants.length > 2 && onChange({ ...config, variants: config.variants.filter(x => x.id !== v.id) })}>
+            ✕
+          </button>
+        </div>
+      ))}
+      <button className="add-link sm" onClick={() => onChange({ ...config, variants: [...config.variants, newSplitPath()] })}>
+        ＋ Add variant
+      </button>
+      <Field label="Goal event (winning metric)">
+        <EventPicker value={config.goalEvent} onChange={goalEvent => onChange({ ...config, goalEvent })} />
+      </Field>
+      <div className="toggle-row" style={{ marginTop: 2 }}>
+        <Toggle checked={config.autoWinner} onChange={autoWinner => onChange({ ...config, autoWinner })} />
+        <div style={{ flex: 1 }}>
+          <div className="t-label">Auto-declare winner</div>
+          <div className="t-sub">Route all users to the best-performing variant once it reaches significance.</div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 /* ── delay / data / flow editors ──────────────────────────────── */
 const DelayEditor: EditorFor<'delay'> = ({ config, onChange }) => (
   <div className="editor-form">
@@ -396,6 +444,7 @@ export const NODE_EDITORS: { [K in NodeKind]: EditorFor<K> } = {
   has_done_event: HasDoneEventEditor,
   cond: CondEditor,
   randomsplit: RandomSplitEditor,
+  abtest: AbTestEditor,
   delay: DelayEditor,
   setattr: SetAttrEditor,
   segment: SegmentEditor,

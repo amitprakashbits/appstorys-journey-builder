@@ -479,6 +479,7 @@ body {
 .editor-textarea { resize: vertical; line-height: 1.5; }
 .editor-hint { font-size: 11.5px; color: var(--tx3); line-height: 1.55; margin: 2px 0 0; }
 .editor-form .cond-row { gap: 7px; }
+.ab-head { display: flex; justify-content: space-between; align-items: center; }
 .editor-form .inline-fields .field { flex: 1; }
 
 /* small glyph in the node-card kind row + neutral branch chip + sheet icon */

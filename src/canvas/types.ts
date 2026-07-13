@@ -36,6 +36,8 @@ export type NodeKind =
   // Split user path (branching)
   | 'cond'
   | 'randomsplit'
+  // Experiments
+  | 'abtest'
   // Delay
   | 'delay'
   // Data
@@ -44,7 +46,7 @@ export type NodeKind =
   // Flow control
   | 'jump'
 
-export type NodeFamily = 'campaign' | 'message' | 'action' | 'ai' | 'usercond' | 'branching' | 'delay' | 'data' | 'flow'
+export type NodeFamily = 'campaign' | 'message' | 'action' | 'ai' | 'usercond' | 'branching' | 'experiment' | 'delay' | 'data' | 'flow'
 
 /* shared building blocks */
 export interface CondRow {
@@ -109,6 +111,8 @@ export interface ConfigByKind {
 
   cond: { conditions: Condition[]; yesLabel: string; noLabel: string }
   randomsplit: { paths: SplitPath[] }
+
+  abtest: { variants: SplitPath[]; goalEvent: string; autoWinner: boolean }
 
   delay: { amount: number; unit: 'Minutes' | 'Hours' | 'Days'; respectDnd: boolean }
 

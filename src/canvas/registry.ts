@@ -18,6 +18,7 @@ export const FAMILY_COLOR: Record<NodeFamily, string> = {
   ai: '#8B5CF6',
   usercond: '#F59E0B',
   branching: '#F59E0B',
+  experiment: '#8B5CF6',
   delay: '#6B7280',
   data: '#8B5CF6',
   flow: '#10B981',
@@ -30,6 +31,7 @@ export const FAMILY_LABEL: Record<NodeFamily, string> = {
   ai: 'AI tools',
   usercond: 'User conditions',
   branching: 'Split user path',
+  experiment: 'Experiments',
   delay: 'Delay',
   data: 'Data',
   flow: 'Flow control',
@@ -75,6 +77,8 @@ export const NODE_TYPES: Record<NodeKind, NodeTypeDef> = {
   // Split user path (branching)
   cond: T('cond', 'branching', 'Conditional Split', 'Split users into paths based on performed events & properties', 'KYC complete?'),
   randomsplit: T('randomsplit', 'branching', 'A/B Split', 'Randomly split users into multiple paths for experimentation', 'A/B split', '#8B5CF6'),
+  // Experiments
+  abtest: T('abtest', 'experiment', 'A/B Test', 'Goal-driven experiment across variants with a winner', 'A/B test'),
   // Delay
   delay: T('delay', 'delay', 'Delay', 'Wait a set time before the next node', 'Wait 24 hours'),
   // Data
@@ -85,7 +89,7 @@ export const NODE_TYPES: Record<NodeKind, NodeTypeDef> = {
 }
 
 /* palette category rail order + membership */
-export const FAMILY_ORDER: NodeFamily[] = ['campaign', 'message', 'action', 'ai', 'usercond', 'branching', 'delay', 'data', 'flow']
+export const FAMILY_ORDER: NodeFamily[] = ['campaign', 'message', 'action', 'ai', 'usercond', 'branching', 'experiment', 'delay', 'data', 'flow']
 export const KINDS_BY_FAMILY: Record<NodeFamily, NodeKind[]> = FAMILY_ORDER.reduce(
   (acc, fam) => {
     acc[fam] = (Object.keys(NODE_TYPES) as NodeKind[]).filter(k => NODE_TYPES[k].family === fam)
@@ -157,6 +161,15 @@ export function makeDefaultConfig(kind: NodeKind): JourneyNodeConfig {
           { id: `p${++seq}`, label: 'Variant B', weight: 50 },
         ],
       }
+    case 'abtest':
+      return {
+        variants: [
+          { id: `p${++seq}`, label: 'Variant A', weight: 50 },
+          { id: `p${++seq}`, label: 'Variant B', weight: 50 },
+        ],
+        goalEvent: 'Select an event',
+        autoWinner: true,
+      }
     case 'delay':
       return { amount: 24, unit: 'Hours', respectDnd: true }
     case 'setattr':
@@ -226,6 +239,10 @@ export function summarize(kind: NodeKind, config: JourneyNodeConfig): string {
       const c = config as ConfigByKind['randomsplit']
       return `${c.paths.length} paths · ${c.paths.map(p => p.weight + '%').join(' / ')}`
     }
+    case 'abtest': {
+      const c = config as ConfigByKind['abtest']
+      return `${c.variants.length} variants · goal ${c.goalEvent && c.goalEvent !== 'Select an event' ? c.goalEvent : '—'}`
+    }
     case 'delay': {
       const c = config as ConfigByKind['delay']
       return `Wait ${c.amount} ${c.unit.toLowerCase()}${c.respectDnd ? ' · Respects DND' : ''}`
@@ -260,6 +277,10 @@ export function branchesFor(kind: NodeKind, config: JourneyNodeConfig): Branch[]
   if (kind === 'path_optimizer') {
     const c = config as ConfigByKind['path_optimizer']
     return c.arms.map(a => ({ id: a.id, label: a.label, tone: 'neutral' as const }))
+  }
+  if (kind === 'abtest') {
+    const c = config as ConfigByKind['abtest']
+    return c.variants.map(v => ({ id: v.id, label: `${v.label} · ${v.weight}%`, tone: 'neutral' as const }))
   }
   if (kind === 'cond') {
     const c = config as ConfigByKind['cond']
@@ -401,6 +422,14 @@ export function cardRows(kind: NodeKind, config: JourneyNodeConfig): CardRow[] {
     }
     case 'randomsplit':
       return [{ k: 'Split', v: `${(config as ConfigByKind['randomsplit']).paths.length} variants`, tone: 'muted' }]
+    case 'abtest': {
+      const c = config as ConfigByKind['abtest']
+      const hasGoal = c.goalEvent && c.goalEvent !== 'Select an event'
+      return [
+        { k: 'Variants', v: String(c.variants.length), tone: 'accent' },
+        { k: 'Goal', v: hasGoal ? c.goalEvent : '—', tone: hasGoal ? 'default' : 'muted' },
+      ]
+    }
     case 'delay': {
       const c = config as ConfigByKind['delay']
       return [
@@ -462,6 +491,12 @@ export function validity(kind: NodeKind, config: JourneyNodeConfig): Validity {
     case 'randomsplit': {
       const total = sumWeights(config as ConfigByKind['randomsplit'])
       return total === 100 ? { ok: true } : { ok: false, msg: `Weights total ${total}%, must be 100%` }
+    }
+    case 'abtest': {
+      const c = config as ConfigByKind['abtest']
+      const total = c.variants.reduce((s, v) => s + v.weight, 0)
+      if (total !== 100) return { ok: false, msg: `Allocation totals ${total}%, must be 100%` }
+      return c.goalEvent && c.goalEvent !== 'Select an event' ? { ok: true } : { ok: false, msg: 'Pick a goal event' }
     }
     case 'delay':
       return (config as ConfigByKind['delay']).amount > 0 ? { ok: true } : { ok: false, msg: 'Set a wait time' }

@@ -32,6 +32,12 @@ const FAMILY_ICON: Record<NodeFamily, JSX.Element> = {
       <path d="M6 8v3a3 3 0 003 3h6a3 3 0 003-3V8M12 14v3" />
     </>
   ),
+  experiment: (
+    <>
+      <path d="M9 3h6M10 3v5.5L5.4 16.6A2 2 0 007.1 20h9.8a2 2 0 001.7-3.4L14 8.5V3" />
+      <path d="M8 14h8" />
+    </>
+  ),
   delay: (
     <>
       <circle cx="12" cy="12" r="8" />
