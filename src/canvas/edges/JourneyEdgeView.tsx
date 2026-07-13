@@ -28,14 +28,14 @@ function JourneyEdgeViewBase(props: EdgeProps<JourneyEdgeData>) {
         path={path}
         markerEnd={markerEnd}
         style={{
-          stroke: isDropTarget || hovered || selected ? '#FB6514' : CONNECTOR,
+          stroke: isDropTarget || selected ? '#FB6514' : CONNECTOR,
           strokeWidth: isDropTarget ? 3.25 : hovered || selected ? 2.75 : 2,
-          filter: isDropTarget || hovered || selected ? 'drop-shadow(0 1px 3px rgba(253,95,3,.28))' : undefined,
+          filter: isDropTarget || selected ? 'drop-shadow(0 1px 3px rgba(253,95,3,.28))' : undefined,
           transition: 'stroke 0.15s ease, stroke-width 0.15s ease, filter 0.15s ease',
         }}
       />
-      {/* animated flow — small light packets travelling along the connector */}
-      <path className="edge-flow" d={path} fill="none" />
+      {/* animated flow — brand-orange packets travelling along the edge, on hover */}
+      {hovered && <path className="edge-flow" d={path} fill="none" />}
 
       {/* wide invisible hit path so hovering the thin edge is forgiving */}
       <path

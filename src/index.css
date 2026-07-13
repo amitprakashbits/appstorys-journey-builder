@@ -365,7 +365,7 @@ body {
 /* edges */
 .journey-edge { transition: stroke-width 0.15s; }
 /* animated flow packets travelling along every connection */
-.edge-flow { stroke: #fff; stroke-width: 2.5; stroke-dasharray: 1.5 12; stroke-linecap: round; opacity: 0.92; pointer-events: none; animation: edgeflow 0.85s linear infinite; }
+.edge-flow { stroke: var(--brand); stroke-width: 3; stroke-dasharray: 2 12; stroke-linecap: round; opacity: 1; pointer-events: none; animation: edgeflow 0.8s linear infinite; }
 @keyframes edgeflow { to { stroke-dashoffset: -13.5; } }
 .journey-edge.is-drop-target { filter: drop-shadow(0 0 3px var(--brand-shadow)); stroke: var(--brand); }
 .canvas-shell.simulate .journey-edge { stroke-dasharray: 6 5; animation: dashflow 1.5s linear infinite; }
