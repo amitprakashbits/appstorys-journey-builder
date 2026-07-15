@@ -13,7 +13,9 @@ import type { Connection, EdgeTypes, NodeTypes, ReactFlowInstance, XYPosition } 
 import 'reactflow/dist/style.css'
 import type { AudienceMode, EventCondition, ExitCondition, TriggerType } from '../types'
 import { Tooltip } from '../components/ui'
-import { NODE_TYPES, branchesFor } from './registry'
+import { NODE_TYPES, branchesFor, summarize } from './registry'
+import { AICreator } from './AICreator'
+import type { FlowSpec, GenNode } from './aiGenerate'
 import { useJourneyGraph } from './useJourneyGraph'
 import { JourneyNodeView } from './nodes/JourneyNodeView'
 import { JourneyEdgeView } from './edges/JourneyEdgeView'
@@ -68,6 +70,7 @@ function CanvasInner(props: CanvasProps) {
   const [dropEdgeId, setDropEdgeId] = useState<string | null>(null)
   const [showHelp, setShowHelp] = useState(false)
   const [editingId, setEditingId] = useState<string | null>(null)
+  const [aiOpen, setAiOpen] = useState(false)
   const connectRef = useRef<{ source: string; sourceHandle: string | null } | null>(null)
   const edgeUpdateOk = useRef(true)
   const reduced = useMemo(prefersReducedMotion, [])
@@ -172,6 +175,25 @@ function CanvasInner(props: CanvasProps) {
   }, [screenToFlowPosition])
 
   const onInsertOnEdge = useCallback((edgeId: string) => setPalette({ mode: 'edge', edgeId }), [])
+
+  /* ── AI creator ──────────────────────────────────────────────── */
+  const applyFlow = useCallback(
+    (spec: FlowSpec) => {
+      g.loadFlow(spec)
+      props.toast('Journey generated')
+      window.setTimeout(() => fitView({ duration: reduced ? 0 : 400, padding: 0.3 }), 60)
+    },
+    [g, props, fitView, reduced],
+  )
+  const applyCampaign = useCallback(
+    (node: GenNode) => {
+      const r = shellRef.current?.getBoundingClientRect()
+      const flow = screenToFlowPosition({ x: (r?.left ?? 0) + (r?.width ?? 600) / 2, y: (r?.top ?? 0) + (r?.height ?? 400) / 2 })
+      g.addNodeWithData(node.kind, flow, { title: node.title, config: node.config, meta: summarize(node.kind, node.config) })
+      props.toast(`${NODE_TYPES[node.kind].name} drafted`)
+    },
+    [g, props, screenToFlowPosition],
+  )
 
   const onPalettePick = useCallback(
     (kind: NodeKind) => {
@@ -362,18 +384,24 @@ function CanvasInner(props: CanvasProps) {
           </EdgeDnDContext.Provider>
         </CanvasContext.Provider>
 
-        {/* empty journey → a single centered ＋ */}
+        {/* empty journey → add-first-step + generate-with-AI */}
         {g.nodes.length === 0 && (
           <div className="canvas-empty">
             <button className="add-node" onClick={openEmptyPalette} aria-label="Add your first step">
               <span className="plus">＋</span>
             </button>
             <div className="canvas-empty-hint">Add your first step</div>
+            <button className="empty-ai" onClick={() => setAiOpen(true)}>
+              <span className="ai-spark">✦</span> Generate with AI
+            </button>
           </div>
         )}
 
         {/* bottom-center floating toolbar */}
         <div className="canvas-bottom-bar">
+          <button className="cbtn ai" onClick={() => setAiOpen(true)} aria-label="Create with AI" title="Create with AI">
+            <span className="ai-spark">✦</span> AI
+          </button>
           <button className="cbtn add" onClick={openEmptyPalette} aria-label="Add step" title="Add a step">
             <span className="plus">＋</span> Add step
           </button>
@@ -434,6 +462,8 @@ function CanvasInner(props: CanvasProps) {
             onSendTest={() => props.toast('Test sent to your test device')}
           />
         )}
+
+        {aiOpen && <AICreator onClose={() => setAiOpen(false)} onApplyFlow={applyFlow} onApplyCampaign={applyCampaign} />}
       </div>
     </div>
   )

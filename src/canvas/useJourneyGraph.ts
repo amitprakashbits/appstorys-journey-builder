@@ -2,7 +2,9 @@ import { useCallback, useRef, useState } from 'react'
 import { applyEdgeChanges, applyNodeChanges, updateEdge } from 'reactflow'
 import type { Connection, EdgeChange, NodeChange, XYPosition } from 'reactflow'
 import { NODE_TYPES, makeDefaultConfig, summarize } from './registry'
-import type { GraphSnapshot, JourneyEdge, JourneyNode, NodeKind } from './types'
+import { layeredLayout } from './layout'
+import type { FlowSpec } from './aiGenerate'
+import type { GraphSnapshot, JourneyEdge, JourneyNode, JourneyNodeData, NodeKind } from './types'
 
 const HISTORY_LIMIT = 50
 
@@ -60,6 +62,8 @@ export interface JourneyGraph {
   onEdgesChange: (changes: EdgeChange[]) => void
   beginInteraction: () => void
   addNode: (kind: NodeKind, position: XYPosition) => string
+  addNodeWithData: (kind: NodeKind, position: XYPosition, data: Partial<JourneyNodeData>) => string
+  loadFlow: (spec: FlowSpec) => void
   addNodeWithConnection: (kind: NodeKind, position: XYPosition, source: string, sourceHandle?: string | null) => void
   insertOnEdge: (edgeId: string, kind: NodeKind) => void
   connect: (c: Connection) => boolean
@@ -112,6 +116,36 @@ export function useJourneyGraph(): JourneyGraph {
       const node = makeNode(kind, position)
       setGraph(g => ({ ...g, nodes: [...g.nodes, node], entryId: g.entryId ?? node.id }))
       return node.id
+    },
+    [pushHistory],
+  )
+
+  /* append one pre-configured node (AI campaign draft) */
+  const addNodeWithData = useCallback(
+    (kind: NodeKind, position: XYPosition, data: Partial<JourneyNodeData>) => {
+      pushHistory()
+      const base = makeNode(kind, position)
+      const node: JourneyNode = { ...base, data: { ...base.data, ...data } }
+      setGraph(g => ({ ...g, nodes: [...g.nodes, node], entryId: g.entryId ?? node.id }))
+      return node.id
+    },
+    [pushHistory],
+  )
+
+  /* replace the canvas with a generated flow (AI journey), auto-laid-out */
+  const loadFlow = useCallback(
+    (spec: FlowSpec) => {
+      pushHistory()
+      const nodes: JourneyNode[] = spec.nodes.map(n => ({
+        id: nid(),
+        type: 'journey',
+        position: { x: 0, y: 0 },
+        data: { kind: n.kind, title: n.title, meta: summarize(n.kind, n.config), config: n.config },
+      }))
+      const edges: JourneyEdge[] = spec.edges.map(e => makeEdge(nodes[e.from].id, nodes[e.to].id, e.branch))
+      const positions = layeredLayout(nodes, edges)
+      const laid = nodes.map(n => (positions[n.id] ? { ...n, position: positions[n.id] } : n))
+      setGraph({ nodes: laid, edges, entryId: laid[0]?.id ?? null })
     },
     [pushHistory],
   )
@@ -339,6 +373,8 @@ export function useJourneyGraph(): JourneyGraph {
     onEdgesChange,
     beginInteraction: pushHistory,
     addNode,
+    addNodeWithData,
+    loadFlow,
     addNodeWithConnection,
     insertOnEdge,
     connect,

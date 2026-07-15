@@ -480,6 +480,38 @@ body {
 .editor-hint { font-size: 11.5px; color: var(--tx3); line-height: 1.55; margin: 2px 0 0; }
 .editor-form .cond-row { gap: 7px; }
 .ab-head { display: flex; justify-content: space-between; align-items: center; }
+
+/* ── AI creator ───────────────────────────────────────────────── */
+.ai-spark { color: var(--brand); }
+.empty-ai { margin-top: 12px; display: inline-flex; align-items: center; gap: 7px; background: #fff; border: 1px solid var(--brand-border); color: var(--brand); font-family: inherit; font-size: 13px; font-weight: 600; padding: 9px 16px; border-radius: 20px; box-shadow: var(--shadow-sm); transition: all 0.15s; }
+.empty-ai:hover { background: var(--cream); box-shadow: var(--shadow-md); transform: translateY(-1px); }
+.cbtn.ai { color: var(--brand); font-size: 12.5px; font-weight: 600; padding: 0 12px; gap: 5px; }
+.cbtn.ai:hover { background: var(--cream); }
+.cbtn.ai .ai-spark { font-size: 13px; }
+
+.ai-panel { width: 520px; max-width: 100%; max-height: min(600px, calc(100% - 16px)); background: #fff; border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 28px 64px -16px rgba(16, 24, 40, 0.32), 0 8px 24px -8px rgba(16, 24, 40, 0.12); display: flex; flex-direction: column; overflow: hidden; animation: panelIn 0.2s cubic-bezier(0.2, 0.8, 0.2, 1); }
+.ai-head { display: flex; justify-content: space-between; align-items: flex-start; padding: 18px 22px 0; }
+.ai-head h2 { font-size: 18px; font-weight: 700; margin: 0; color: var(--tx); display: flex; align-items: center; gap: 8px; }
+.ai-head p { font-size: 12.5px; color: var(--tx3); margin: 5px 0 0; }
+.ai-tabs { display: inline-flex; margin: 14px 22px 0; background: var(--bg); border: 1px solid var(--line); border-radius: 9px; padding: 3px; gap: 2px; }
+.ai-tabs button { border: none; background: none; font-family: inherit; font-size: 13px; font-weight: 500; color: var(--tx2); padding: 8px 16px; border-radius: 7px; transition: all 0.15s; }
+.ai-tabs button.on { background: #fff; color: var(--brand); font-weight: 600; box-shadow: var(--shadow-sm); }
+.ai-prompt { display: block; margin: 14px 22px 0; width: calc(100% - 44px); box-sizing: border-box; border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; font-family: inherit; font-size: 13.5px; line-height: 1.5; color: var(--tx); outline: none; resize: vertical; }
+.ai-prompt:focus { border-color: var(--brand); box-shadow: 0 0 0 3px rgba(251, 101, 20, 0.12); }
+.ai-chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 22px 0; }
+.ai-chip { background: var(--bg); border: 1px solid var(--line); border-radius: 20px; padding: 6px 12px; font-family: inherit; font-size: 12px; color: var(--tx2); transition: all 0.15s; }
+.ai-chip:hover { border-color: var(--brand-border); background: var(--cream); color: var(--tx); }
+.ai-result { margin: 14px 22px 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+.ai-note { display: flex; gap: 8px; align-items: flex-start; padding: 12px 14px; background: var(--cream); color: #9A3412; font-size: 12.5px; font-weight: 500; line-height: 1.5; }
+.ai-steps { max-height: 232px; overflow-y: auto; padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+.ai-step { display: flex; align-items: center; gap: 11px; padding: 8px 9px; border-radius: 9px; }
+.ai-step-icon { width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; flex-shrink: 0; }
+.ai-step-icon svg { width: 15px; height: 15px; stroke: currentColor; }
+.ai-step-text { display: flex; flex-direction: column; gap: 1px; min-width: 0; }
+.ai-step-kind { font-size: 9px; font-weight: 700; letter-spacing: 0.07em; text-transform: uppercase; }
+.ai-step-title { font-size: 13px; font-weight: 600; color: var(--tx); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ai-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 16px 22px; margin-top: 16px; border-top: 1px solid var(--line); }
+.ai-generate { width: 100%; }
 .editor-form .inline-fields .field { flex: 1; }
 
 /* small glyph in the node-card kind row + neutral branch chip + sheet icon */
