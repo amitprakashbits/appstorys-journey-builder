@@ -1,4 +1,4 @@
-# AppStorys — Journey Creation Wizard (Setup + Canvas)
+# AppStorys - Journey Creation Wizard (Setup + Canvas)
 
 Multi-step journey creation flow for the AppStorys dashboard, built in the
 AppStorys design system (Poppins, orange `#FB6514` brand gradient, cream
@@ -26,8 +26,8 @@ open in a browser) and also viewable rendered at the live link:
 
 | Doc | In repo | View rendered |
 | --- | --- | --- |
-| **Product spec** — annotated screens explaining the requirements the way a PM would present them | [docs/product-spec.html](docs/product-spec.html) | [open](https://claude.ai/code/artifact/81d0accd-50fa-44bf-8a03-b4aac7461e41) |
-| **Requirements** — every screen and control as functional requirements with acceptance criteria, no code | [docs/requirements.html](docs/requirements.html) | [open](https://claude.ai/code/artifact/d2fad984-d47c-4dfb-ac54-42f52e1d7a9d) |
+| **Product spec** - annotated screens explaining the requirements the way a PM would present them | [docs/product-spec.html](docs/product-spec.html) | [open](https://claude.ai/code/artifact/81d0accd-50fa-44bf-8a03-b4aac7461e41) |
+| **Requirements** - every screen and control as functional requirements with acceptance criteria, no code | [docs/requirements.html](docs/requirements.html) | [open](https://claude.ai/code/artifact/d2fad984-d47c-4dfb-ac54-42f52e1d7a9d) |
 
 Supporting technical notes: [canvas-engine.md](docs/canvas-engine.md) ·
 [engineering-spec.md](docs/engineering-spec.md) ·
@@ -37,20 +37,20 @@ Live prototype: <https://appstorys-journey-setup.vercel.app>
 
 ## Screens & flows
 
-- **Step 1 — Details and goals**: journey name (synced with top bar), removable
+- **Step 1 - Details and goals**: journey name (synced with top bar), removable
   tags with add-on-Enter, conversion goals (name / goal event / attribution
   window, max 3).
-- **Step 2 — When will users enter the journey**, three switchable variants:
-  - **On event trigger** — "Has executed" event rows with alternate (OR) and
+- **Step 2 - When will users enter the journey**, three switchable variants:
+  - **On event trigger** - "Has executed" event rows with alternate (OR) and
     secondary (AND) triggers, Immediately / With delay, journey schedule
     (ASAP with Ends Never/On, or specific date-time), limit-entry settings,
     exit-based-on-conditions.
-  - **At fixed time** — One time (ASAP / specific date & time) and Periodic
+  - **At fixed time** - One time (ASAP / specific date & time) and Periodic
     (Daily / Weekly with day chips / Monthly with day-of-month), live preview
     lines, 10Mn-segment warning banner.
-  - **On journey exit** — "Has exited [journey] from [exit stage]" rows,
+  - **On journey exit** - "Has exited [journey] from [exit stage]" rows,
     delay-after-exit with live banner, schedule, settings, exit conditions.
-- **Step 3 — Who will enter the journey**: All users / Segments / Custom rules,
+- **Step 3 - Who will enter the journey**: All users / Segments / Custom rules,
   segment chips with counts, AND rule builder, exclusion segments,
   control-group holdout slider, and a live **estimated reach** panel.
 - **Canvas** (n8n-like, React Flow): a free-form, infinite pan/zoom editor.
@@ -60,7 +60,7 @@ Live prototype: <https://appstorys-journey-setup.vercel.app>
   palette rows onto the canvas or onto an edge. The "Add to journey" palette is
   a searchable, categorized picker of 22 node types across 6 families
   (Campaigns · Messages · Branching · Delay · Data · Flow control), each with a
-  bespoke editor. Condition and Random-split nodes fork into branches. Entry trigger shows as a badge on the first node — no
+  bespoke editor. Condition and Random-split nodes fork into branches. Entry trigger shows as a badge on the first node - no
   Start/End nodes. Bottom toolbar (zoom / fit / snap / tidy-up / undo-redo),
   restyled minimap, full keyboard layer (delete, ⌘D duplicate, ⌘Z/⇧⌘Z
   undo-redo, ⌘A select-all, arrow-nudge), and publish validation (≥1 node,
@@ -108,7 +108,7 @@ tailwind.config.js             brand color scale (brand.*) + Poppins font
 Tailwind is configured (JIT, `brand` scale, Poppins in `tailwind.config.js`)
 and utilities can be used anywhere. The pixel-faithful AppStorys look lives as
 component classes in `src/index.css` so the approved prototype design ports
-over exactly — the standalone HTML files in `prototype/` are the visual source
+over exactly - the standalone HTML files in `prototype/` are the visual source
 of truth.
 
 ## Wiring notes for engineering
@@ -116,7 +116,7 @@ of truth.
 - All wizard state lives in `App.tsx`; steps are controlled components, so
   swapping mock option lists (events, segments, journeys, properties) for API
   data is localized to the constant arrays at the top of each step file.
-- Estimated reach in `Step3Audience.tsx` is a mock formula — replace with the
+- Estimated reach in `Step3Audience.tsx` is a mock formula - replace with the
   segment-count endpoint.
 - Publish validation in `Canvas.tsx` currently checks steps > 0 and a selected
   trigger event; extend with server-side validation as needed.
