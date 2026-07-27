@@ -19,6 +19,22 @@ npm run preview    # serve the production build
 
 Node 18+ recommended.
 
+## Documentation
+
+Two specs describe the Journey Builder for the team. Each is committed here (HTML,
+open in a browser) and also viewable rendered at the live link:
+
+| Doc | In repo | View rendered |
+| --- | --- | --- |
+| **Product spec** — annotated screens explaining the requirements the way a PM would present them | [docs/product-spec.html](docs/product-spec.html) | [open](https://claude.ai/code/artifact/81d0accd-50fa-44bf-8a03-b4aac7461e41) |
+| **Requirements** — every screen and control as functional requirements with acceptance criteria, no code | [docs/requirements.html](docs/requirements.html) | [open](https://claude.ai/code/artifact/d2fad984-d47c-4dfb-ac54-42f52e1d7a9d) |
+
+Supporting technical notes: [canvas-engine.md](docs/canvas-engine.md) ·
+[engineering-spec.md](docs/engineering-spec.md) ·
+[consistency-sweep.md](docs/consistency-sweep.md).
+
+Live prototype: <https://appstorys-journey-setup.vercel.app>
+
 ## Screens & flows
 
 - **Step 1 — Details and goals**: journey name (synced with top bar), removable
