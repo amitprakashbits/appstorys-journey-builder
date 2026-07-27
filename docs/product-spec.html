@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Journey Builder — Product Spec</title>
+<title>Journey Builder - Product Spec</title>
 <style>html{background:#FBFAF8}@media(prefers-color-scheme:dark){html{background:#121216}}body{margin:0}</style>
 </head>
 <body>
@@ -140,10 +140,10 @@
 
   <div class="key">
     <span class="pin" style="position:static">1</span>
-    <p><b>How to read this.</b> Every screen below is annotated with numbered pins. Each number maps to a requirement underneath it — what the control does, and (where it matters) the <b style="color:var(--green)">acceptance rule</b> it must satisfy.</p>
+    <p><b>How to read this.</b> Every screen below is annotated with numbered pins. Each number maps to a requirement underneath it - what the control does, and (where it matters) the <b style="color:var(--green)">acceptance rule</b> it must satisfy.</p>
   </div>
 
-  <!-- ============ SCREEN 1 — SETUP ============ -->
+  <!-- ============ SCREEN 1 - SETUP ============ -->
   <section class="screen">
     <div class="screen-head"><span class="n">01</span><h2>Journey setup</h2></div>
     <p class="screen-sub">Before the canvas, the user defines how people enter the journey and who qualifies. A live reach estimate keeps the decision grounded.</p>
@@ -194,15 +194,15 @@
     <div class="notes">
       <div class="note"><span class="num">2</span><div><h4>Trigger type</h4><p>Segment-triggered (audience membership) or event-triggered (an action). This choice changes the fields below it.</p></div></div>
       <div class="note"><span class="num">3</span><div><h4>Trigger event</h4><p>A single event from the events catalog, chosen through the searchable, category-grouped picker.</p><span class="req">Must be an active event</span></div></div>
-      <div class="note"><span class="num">4</span><div><h4>Audience</h4><p>All users, or a droplist of <b>active cohorts only</b>. Cohorts are never created here — an empty state links out to the Cohorts flow.</p></div></div>
+      <div class="note"><span class="num">4</span><div><h4>Audience</h4><p>All users, or a droplist of <b>active cohorts only</b>. Cohorts are never created here - an empty state links out to the Cohorts flow.</p></div></div>
       <div class="note"><span class="num">5</span><div><h4>Estimated reach</h4><p>Recomputes live as trigger/audience change, so the user sees journey size before committing.</p></div></div>
     </div>
   </section>
 
-  <!-- ============ SCREEN 2 — CANVAS (HERO) ============ -->
+  <!-- ============ SCREEN 2 - CANVAS (HERO) ============ -->
   <section class="screen">
     <div class="screen-head"><span class="n">02</span><h2>Flow canvas</h2></div>
-    <p class="screen-sub">The heart of the builder — a free-form, top-down graph. Each node is a step; connections define the path. It reads and behaves like a modern node editor, in AppStorys styling.</p>
+    <p class="screen-sub">The heart of the builder - a free-form, top-down graph. Each node is a step; connections define the path. It reads and behaves like a modern node editor, in AppStorys styling.</p>
 
     <div class="stage grid mk" style="min-height:560px">
       <div class="stage-bar"><div class="dot3"><i></i><i></i><i></i></div><span class="stage-title">Journeys › Create journey › Flow and content</span></div>
@@ -271,7 +271,7 @@
 
     <div class="notes">
       <div class="note"><span class="num">6</span><div><h4>Simulate &amp; live stats</h4><p>Reach / delivered / conversions read from a dry-run so the user can gauge the flow before publishing.</p></div></div>
-      <div class="note"><span class="num">7</span><div><h4>Entry badge — no Start node</h4><p>The trigger config from setup rides as a badge on the first node. Entry is simply the node with no incoming edge.</p></div></div>
+      <div class="note"><span class="num">7</span><div><h4>Entry badge - no Start node</h4><p>The trigger config from setup rides as a badge on the first node. Entry is simply the node with no incoming edge.</p></div></div>
       <div class="note"><span class="num">8</span><div><h4>Node card</h4><p>Kind icon + name + editable title, then the 2–3 highest-signal config values. Double-click (or the hover toolbar) opens the editor.</p></div></div>
       <div class="note"><span class="num">9</span><div><h4>Ports &amp; connections</h4><p>Drag a bottom port to another node's top port to connect. Orthogonal edges; hovering shows flowing packets and a mid-edge "＋" to insert inline.</p><span class="req">Rejects cycles &amp; edges into entry</span></div></div>
       <div class="note"><span class="num">10</span><div><h4>Needs-setup &amp; branches</h4><p>A red "!" flags an unconfigured node. Branching nodes fan into labelled ports (Yes / No, or A/B variants) that connect independently.</p><span class="req must">Publish blocks orphaned branches</span></div></div>
@@ -279,16 +279,16 @@
     </div>
   </section>
 
-  <!-- ============ SCREEN 3 — PALETTE ============ -->
+  <!-- ============ SCREEN 3 - PALETTE ============ -->
   <section class="screen">
     <div class="screen-head"><span class="n">03</span><h2>Add to journey</h2></div>
     <p class="screen-sub">The node catalogue. Opened from the empty state, the "+" on any edge, or dropping a connection on empty canvas.</p>
 
     <div class="stage mk">
       <div class="card" style="padding:0;overflow:hidden;max-width:720px;margin:0 auto">
-        <div style="padding:16px 20px 0;position:relative"><h4 style="font-size:16px">Add to journey</h4><p style="font-size:12px;color:#9C988F;margin:3px 0 0">Pick a campaign type to create or import — or a logic node</p>
+        <div style="padding:16px 20px 0;position:relative"><h4 style="font-size:16px">Add to journey</h4><p style="font-size:12px;color:#9C988F;margin:3px 0 0">Pick a campaign type to create or import - or a logic node</p>
           <span class="pin" style="top:14px;left:250px">12</span></div>
-        <div style="margin:13px 20px 0;display:flex;align-items:center;gap:9px;border:1.5px solid #E4E1DB;border-radius:10px;padding:9px 13px;color:#B7B2A8;font-size:13px">⌕ Search node types — modal, delay, branch…</div>
+        <div style="margin:13px 20px 0;display:flex;align-items:center;gap:9px;border:1.5px solid #E4E1DB;border-radius:10px;padding:9px 13px;color:#B7B2A8;font-size:13px">⌕ Search node types - modal, delay, branch…</div>
         <div style="display:grid;grid-template-columns:180px 1fr;margin-top:13px;border-top:1px solid #F3F1EC">
           <div style="border-right:1px solid #F3F1EC;padding:12px 10px;display:flex;flex-direction:column;gap:2px;position:relative">
             <span class="pin" style="top:8px;right:-11px">13</span>
@@ -319,10 +319,10 @@
     </div>
   </section>
 
-  <!-- ============ SCREEN 4 — EDITOR SHEET ============ -->
+  <!-- ============ SCREEN 4 - EDITOR SHEET ============ -->
   <section class="screen">
     <div class="screen-head"><span class="n">04</span><h2>Node editor</h2></div>
-    <p class="screen-sub">A right-side sheet to configure a node. Every node type has one — no dead nodes.</p>
+    <p class="screen-sub">A right-side sheet to configure a node. Every node type has one - no dead nodes.</p>
     <div class="stage mk" style="display:flex;justify-content:flex-end">
       <div class="card" style="width:360px;padding:0;overflow:hidden">
         <div style="display:flex;align-items:center;gap:11px;padding:15px 18px;border-bottom:1px solid #F3F1EC;position:relative">
@@ -350,13 +350,13 @@
     </div>
     <div class="notes">
       <div class="note"><span class="num">15</span><div><h4>Status pill</h4><p>READY (green) / NEEDS SETUP (amber), driven by the same validity check as the card's "!" badge.</p></div></div>
-      <div class="note"><span class="num">16</span><div><h4>Live "On the card" preview</h4><p>Shows exactly what the canvas card will become as the user edits — before saving.</p></div></div>
+      <div class="note"><span class="num">16</span><div><h4>Live "On the card" preview</h4><p>Shows exactly what the canvas card will become as the user edits - before saving.</p></div></div>
       <div class="note"><span class="num">17</span><div><h4>Kind-specific form</h4><p>Each type gets a tailored form (campaign picker, message fields, condition builder, delay, split weights…).</p></div></div>
       <div class="note"><span class="num">18</span><div><h4>Save &amp; guard</h4><p>Save is disabled until dirty and writes back live. Closing with unsaved changes asks to discard or keep editing.</p><span class="req">Edits are undo-able</span></div></div>
     </div>
   </section>
 
-  <!-- ============ SCREEN 5 — SPECIALISED INPUTS ============ -->
+  <!-- ============ SCREEN 5 - SPECIALISED INPUTS ============ -->
   <section class="screen">
     <div class="screen-head"><span class="n">05</span><h2>Specialised inputs</h2></div>
     <p class="screen-sub">Two shared inputs carry most of the configuration weight and must match these designs exactly.</p>
@@ -397,7 +397,7 @@
   </section>
 
   <footer class="foot">
-    <p>AppStorys Journey Builder — product spec. Companion engineering doc: <code>docs/engineering-spec.md</code>. Live prototype: <a href="https://appstorys-journey-setup.vercel.app">appstorys-journey-setup.vercel.app</a>. Mockups are representative; exact tokens live in <code>src/index.css</code>.</p>
+    <p>AppStorys Journey Builder - product spec. Companion engineering doc: <code>docs/engineering-spec.md</code>. Live prototype: <a href="https://appstorys-journey-setup.vercel.app">appstorys-journey-setup.vercel.app</a>. Mockups are representative; exact tokens live in <code>src/index.css</code>.</p>
   </footer>
 </div>
 
