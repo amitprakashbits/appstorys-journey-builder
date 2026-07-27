@@ -1,0 +1,405 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Journey Builder — Product Spec</title>
+<style>html{background:#FBFAF8}@media(prefers-color-scheme:dark){html{background:#121216}}body{margin:0}</style>
+</head>
+<body>
+<style>
+  :root{
+    --bg:#FBFAF8; --surface:#FFFFFF; --panel:#FFFFFF;
+    --ink:#1A1B1E; --muted:#615E59; --faint:#9C988F;
+    --line:#EBE8E2; --line-soft:#F3F1EC;
+    --brand:#FB6514; --brand-deep:#FD5F03; --cream:#FEF3ED; --brand-border:#FDBA74;
+    --green:#067A57; --green-bg:#ECFDF5; --green-bd:#A7E8CD;
+    --amber:#92400E; --amber-bg:#FBEEDA; --amber-bd:#F6D9A6;
+    --red:#DC4A3D; --red-bg:#FCECEA;
+    --blue:#2F72C7; --purple:#7C5CD6;
+    --stage:#FBFBFD; --dot:#DEDCD6;
+    --shadow:0 1px 2px rgba(28,24,18,.05), 0 10px 26px -12px rgba(28,24,18,.16);
+    --shadow-lg:0 24px 60px -20px rgba(28,24,18,.30);
+  }
+  @media (prefers-color-scheme:dark){
+    :root{
+      --bg:#131318; --surface:#1B1B21; --panel:#212128;
+      --ink:#F1EFEA; --muted:#A6A29A; --faint:#726E66;
+      --line:#2A2A31; --line-soft:#232329;
+      --stage:#F4F5F8; --dot:#D8DAE0;
+    }
+  }
+  :root[data-theme="light"]{
+    --bg:#FBFAF8; --surface:#FFFFFF; --panel:#FFFFFF; --ink:#1A1B1E; --muted:#615E59; --faint:#9C988F; --line:#EBE8E2; --line-soft:#F3F1EC; --stage:#FBFBFD; --dot:#DEDCD6;
+  }
+  :root[data-theme="dark"]{
+    --bg:#131318; --surface:#1B1B21; --panel:#212128; --ink:#F1EFEA; --muted:#A6A29A; --faint:#726E66; --line:#2A2A31; --line-soft:#232329; --stage:#F4F5F8; --dot:#D8DAE0;
+  }
+
+  *{box-sizing:border-box}
+  .doc{font-family:ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;color:var(--ink);background:var(--bg);
+    line-height:1.6;-webkit-font-smoothing:antialiased;max-width:940px;margin:0 auto;padding:44px 28px 80px}
+  .doc h1,.doc h2,.doc h3,.doc h4{margin:0;font-weight:650;letter-spacing:-.015em;text-wrap:balance;color:var(--ink)}
+  .eyebrow{font-size:11.5px;font-weight:700;letter-spacing:.16em;text-transform:uppercase;color:var(--brand)}
+  .tnum{font-variant-numeric:tabular-nums}
+
+  /* header */
+  .head{border-bottom:1px solid var(--line);padding-bottom:26px;margin-bottom:8px}
+  .brand-row{display:flex;align-items:center;gap:11px;margin-bottom:20px}
+  .mark{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--brand-deep),#FF8A3C);display:grid;place-items:center;color:#fff;font-weight:800;font-size:17px}
+  .wm{font-size:16px;font-weight:650}.wm b{color:var(--brand)}
+  .head h1{font-size:38px;line-height:1.08;margin:6px 0 10px}
+  .lede{font-size:16.5px;color:var(--muted);max-width:64ch}
+  .meta{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+  .chip{font-size:12px;font-weight:600;padding:5px 11px;border-radius:20px;border:1px solid var(--line);color:var(--muted);background:var(--surface)}
+  .chip b{color:var(--ink)}
+
+  .key{display:flex;gap:12px;align-items:flex-start;margin:26px 0 8px;padding:14px 16px;background:var(--surface);border:1px solid var(--line);border-radius:12px}
+  .key .pin{position:static;flex-shrink:0}
+  .key p{margin:0;font-size:13.5px;color:var(--muted)}
+  .key b{color:var(--ink)}
+
+  /* section */
+  .screen{margin-top:56px}
+  .screen-head{display:flex;align-items:baseline;gap:14px;margin-bottom:6px}
+  .screen-head .n{font-size:13px;font-weight:700;color:var(--brand);letter-spacing:.04em}
+  .screen-head h2{font-size:25px}
+  .screen-sub{font-size:15px;color:var(--muted);margin:2px 0 22px;max-width:70ch}
+
+  /* stage that holds a mockup */
+  .stage{position:relative;background:var(--stage);border:1px solid var(--line);border-radius:16px;padding:26px;overflow:hidden}
+  .stage.grid{background-image:radial-gradient(var(--dot) 1px,transparent 1px);background-size:22px 22px}
+  .stage-bar{display:flex;align-items:center;gap:8px;margin:-4px -4px 18px;padding-bottom:14px;border-bottom:1px solid #EDEBE6}
+  .dot3{display:flex;gap:6px}.dot3 i{width:10px;height:10px;border-radius:50%;background:#E4E1DB}
+  .stage-title{font-size:12.5px;color:#8A867E;font-weight:600}
+
+  /* annotation pin */
+  .pin{position:absolute;width:24px;height:24px;border-radius:50%;background:var(--brand);color:#fff;font-size:12.5px;font-weight:800;display:grid;place-items:center;box-shadow:0 2px 6px rgba(253,95,3,.4),0 0 0 3px var(--stage);z-index:5;font-variant-numeric:tabular-nums}
+  .pin.d{background:#2A2B31;box-shadow:0 2px 6px rgba(0,0,0,.25),0 0 0 3px var(--stage)}
+
+  /* annotations list */
+  .notes{margin-top:22px;display:grid;grid-template-columns:1fr 1fr;gap:14px 26px}
+  @media (max-width:680px){.notes{grid-template-columns:1fr}.doc{padding:32px 18px 60px}.head h1{font-size:30px}}
+  .note{display:flex;gap:12px;align-items:flex-start}
+  .note .num{flex-shrink:0;width:23px;height:23px;border-radius:50%;background:var(--cream);color:var(--brand-deep);border:1px solid var(--brand-border);font-size:12px;font-weight:800;display:grid;place-items:center;margin-top:1px;font-variant-numeric:tabular-nums}
+  .note h4{font-size:14px;margin-bottom:2px}
+  .note p{margin:0;font-size:13px;color:var(--muted)}
+  .note .req{display:inline-block;margin-top:5px;font-size:11px;font-weight:700;letter-spacing:.03em;color:var(--green);background:var(--green-bg);border:1px solid var(--green-bd);padding:2px 8px;border-radius:5px}
+  .note .req.must{color:var(--amber);background:var(--amber-bg);border-color:var(--amber-bd)}
+
+  /* ---- mini app primitives used across mockups ---- */
+  .mk{font-family:"Poppins",ui-sans-serif,system-ui,sans-serif}
+  .card{background:#fff;border:1px solid #E9E7E2;border-radius:14px;box-shadow:0 1px 2px rgba(28,24,18,.05),0 12px 28px -14px rgba(28,24,18,.16)}
+  .node{position:relative;width:230px;background:#fff;border:1px solid #E7E4DE;border-radius:12px;padding:13px 15px;box-shadow:0 2px 6px -2px rgba(16,24,40,.08),0 10px 22px -12px rgba(16,24,40,.14)}
+  .node.entry{border:1.5px solid var(--brand);box-shadow:0 10px 26px -10px rgba(253,95,3,.35)}
+  .node.warn{border-color:#FCD9A8}
+  .n-badge{display:inline-flex;align-items:center;gap:6px;font-size:8.5px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:var(--brand);background:var(--cream);border:1px solid var(--brand-border);border-radius:20px;padding:3px 9px;margin-bottom:9px}
+  .n-badge i{width:6px;height:6px;border-radius:50%;background:#22C081}
+  .n-head{display:flex;align-items:center;gap:10px}
+  .n-ico{width:34px;height:34px;border-radius:9px;display:grid;place-items:center;flex-shrink:0;box-shadow:inset 0 0 0 1px rgba(16,24,40,.03),0 1px 3px rgba(16,24,40,.06)}
+  .n-eye{font-size:8.5px;font-weight:800;letter-spacing:.07em;text-transform:uppercase}
+  .n-title{font-size:13.5px;font-weight:650;color:#17181C;letter-spacing:-.01em}
+  .n-rows{margin-top:10px;padding-top:9px;border-top:1px solid #F1EFEA;display:flex;flex-direction:column;gap:4px}
+  .n-row{display:flex;font-size:10.5px}.n-row .k{color:#9C988F;font-weight:500}.n-row .v{margin-left:auto;font-weight:700;color:#40403C}
+  .n-row .v.acc{color:#C2410C}.n-row .v.mut{color:#9C988F;font-weight:500}
+  .n-err{position:absolute;top:-9px;right:-9px;width:19px;height:19px;border-radius:50%;background:var(--red);color:#fff;font-size:12px;font-weight:800;display:grid;place-items:center;box-shadow:0 2px 6px rgba(16,24,40,.18)}
+  .port{position:absolute;width:11px;height:11px;border-radius:50%;background:#fff;border:1.75px solid #C2C7D0;left:50%;transform:translateX(-50%)}
+  .port.t{top:-6px}.port.b{bottom:-6px}.port.b.fill{background:#C2C7D0}
+  .conn{position:absolute;background:#F0AA7B;z-index:0}
+  .bpill{position:absolute;display:inline-flex;align-items:center;gap:6px;font-size:9.5px;font-weight:700;padding:3px 10px;border-radius:20px;background:#fff;box-shadow:0 1px 2px rgba(16,24,40,.06);z-index:2}
+  .bpill.yes{color:var(--green);border:1px solid var(--green-bd)}.bpill.yes::before{content:"";width:5px;height:5px;border-radius:50%;background:#10B981}
+  .bpill.no{color:#B42318;border:1px solid #FBCFCB}.bpill.no::before{content:"";width:5px;height:5px;border-radius:50%;background:var(--red)}
+  .eplus{position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;border:1px solid var(--brand-border);color:var(--brand);font-size:12px;font-weight:700;display:grid;place-items:center;box-shadow:0 0 0 4px var(--stage),0 1px 4px rgba(16,24,40,.12);z-index:3}
+  .toolbar{position:absolute;left:50%;transform:translateX(-50%);bottom:16px;display:flex;align-items:center;gap:5px;background:#fff;border:1px solid #E9E7E2;border-radius:12px;box-shadow:var(--shadow-lg);padding:6px 8px;z-index:4}
+  .toolbar b{width:28px;height:28px;display:grid;place-items:center;color:#615E59;font-size:14px;font-weight:600;border-radius:7px}
+  .toolbar .zoom{font-size:11px;color:#8A867E;font-weight:600;padding:0 4px}
+  .toolbar .sep{width:1px;height:18px;background:#EDEBE6}
+  .tag{display:inline-flex;align-items:center;font-size:10.5px;font-weight:700;padding:2px 9px;border-radius:20px}
+  .tag.g{color:var(--green);background:var(--green-bg);border:1px solid var(--green-bd)}
+  .tag.a{color:var(--amber);background:var(--amber-bg);border:1px solid var(--amber-bd)}
+  .stat{display:flex;flex-direction:column}
+  .foot{margin-top:60px;border-top:1px solid var(--line);padding-top:20px;font-size:12.5px;color:var(--faint)}
+  .foot a{color:var(--brand);text-decoration:none}
+</style>
+
+<h2 class="sr-only" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Product spec for the AppStorys Journey Builder with annotated screen mockups explaining each requirement.</h2>
+
+<div class="doc">
+  <header class="head">
+    <div class="brand-row"><div class="mark">A</div><div class="wm">App<b>Storys</b></div></div>
+    <div class="eyebrow">Product spec · Engage</div>
+    <h1>Journey Builder</h1>
+    <p class="lede">Build an in-app journey visually: pick who enters and when, then lay out the flow of campaigns, messages, waits, and branches on a canvas. This spec walks each screen and calls out what every control must do.</p>
+    <div class="meta">
+      <span class="chip">Owner · <b>PM, AppStorys</b></span>
+      <span class="chip">Surface · <b>Engage › Journeys</b></span>
+      <span class="chip">Status · <b>Build-ready</b></span>
+      <span class="chip">Nodes · <b>29 types · 10 families</b></span>
+    </div>
+  </header>
+
+  <div class="key">
+    <span class="pin" style="position:static">1</span>
+    <p><b>How to read this.</b> Every screen below is annotated with numbered pins. Each number maps to a requirement underneath it — what the control does, and (where it matters) the <b style="color:var(--green)">acceptance rule</b> it must satisfy.</p>
+  </div>
+
+  <!-- ============ SCREEN 1 — SETUP ============ -->
+  <section class="screen">
+    <div class="screen-head"><span class="n">01</span><h2>Journey setup</h2></div>
+    <p class="screen-sub">Before the canvas, the user defines how people enter the journey and who qualifies. A live reach estimate keeps the decision grounded.</p>
+
+    <div class="stage mk">
+      <div class="stage-bar"><div class="dot3"><i></i><i></i><i></i></div><span class="stage-title">Journeys › Create journey › Journey setup</span></div>
+      <div style="display:grid;grid-template-columns:1fr 300px;gap:20px">
+        <div class="card" style="padding:18px 20px">
+          <div style="display:flex;gap:22px;font-size:13px;font-weight:600;border-bottom:1px solid #EFEDE8;padding-bottom:12px;margin-bottom:18px">
+            <span style="color:var(--brand);border-bottom:2px solid var(--brand);padding-bottom:12px;margin-bottom:-13px">Trigger &amp; Audience</span>
+            <span style="color:#9C988F">Entry &amp; Exit</span><span style="color:#9C988F">Goals</span>
+          </div>
+          <div style="font-size:13px;font-weight:650;margin-bottom:3px">Trigger</div>
+          <div style="font-size:11.5px;color:#9C988F;margin-bottom:10px">How users enter this journey</div>
+          <div style="display:inline-flex;background:#F5F4F1;border:1px solid #E9E7E2;border-radius:9px;padding:3px;gap:2px;position:relative">
+            <span style="padding:7px 15px;font-size:12.5px;font-weight:600;color:#615E59;border-radius:6px">Segment</span>
+            <span style="padding:7px 15px;font-size:12.5px;font-weight:700;color:#fff;background:var(--brand);border-radius:6px">Event-Triggered</span>
+            <span class="pin" style="top:-11px;right:-11px">2</span>
+          </div>
+          <div style="font-size:13px;font-weight:650;margin:18px 0 8px;position:relative">Trigger event
+            <span class="pin" style="top:20px;left:150px">3</span></div>
+          <div style="display:flex;align-items:center;justify-content:space-between;border:1px solid #E4E1DB;border-radius:9px;padding:10px 13px;font-size:13px;color:#40403C">app_opened <span style="color:#B7B2A8">▾</span></div>
+          <div style="font-size:13px;font-weight:650;margin:18px 0 4px">Audience</div>
+          <div style="font-size:11.5px;color:#9C988F;margin-bottom:9px">Target all users or specific cohorts</div>
+          <div style="display:flex;align-items:center;justify-content:space-between;border:1px solid #E4E1DB;border-radius:9px;padding:9px 13px;font-size:13px;color:#40403C;position:relative;max-width:210px">All users <span style="color:#B7B2A8">▾</span>
+            <span class="pin" style="top:-11px;right:-11px">4</span></div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:14px">
+          <div class="card" style="padding:16px 18px;background:linear-gradient(180deg,#FFF6EF,#FFFDFB);border-color:#F6D9A6;position:relative">
+            <div style="font-size:12.5px;font-weight:650;color:#8A5A2B">Estimated reach</div>
+            <div class="tnum" style="font-size:34px;font-weight:750;color:var(--brand);letter-spacing:-.02em">8,200</div>
+            <div style="font-size:11px;color:#B08A5E">of 4.8M reachable</div>
+            <span class="pin" style="top:-11px;right:-11px">5</span>
+          </div>
+          <div class="card" style="padding:14px 16px">
+            <div style="font-size:12.5px;font-weight:650;margin-bottom:8px">Journey summary</div>
+            <div style="display:flex;flex-direction:column;gap:7px;font-size:11.5px">
+              <div style="display:flex;justify-content:space-between"><span style="color:#9C988F">Trigger</span><b>Event-Triggered</b></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:#9C988F">Event</span><b>app_opened</b></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:#9C988F">Re-entry</span><b>once</b></div>
+              <div style="display:flex;justify-content:space-between"><span style="color:#9C988F">Rollout</span><span class="tag" style="background:var(--brand);color:#fff">100%</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="notes">
+      <div class="note"><span class="num">2</span><div><h4>Trigger type</h4><p>Segment-triggered (audience membership) or event-triggered (an action). This choice changes the fields below it.</p></div></div>
+      <div class="note"><span class="num">3</span><div><h4>Trigger event</h4><p>A single event from the events catalog, chosen through the searchable, category-grouped picker.</p><span class="req">Must be an active event</span></div></div>
+      <div class="note"><span class="num">4</span><div><h4>Audience</h4><p>All users, or a droplist of <b>active cohorts only</b>. Cohorts are never created here — an empty state links out to the Cohorts flow.</p></div></div>
+      <div class="note"><span class="num">5</span><div><h4>Estimated reach</h4><p>Recomputes live as trigger/audience change, so the user sees journey size before committing.</p></div></div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 2 — CANVAS (HERO) ============ -->
+  <section class="screen">
+    <div class="screen-head"><span class="n">02</span><h2>Flow canvas</h2></div>
+    <p class="screen-sub">The heart of the builder — a free-form, top-down graph. Each node is a step; connections define the path. It reads and behaves like a modern node editor, in AppStorys styling.</p>
+
+    <div class="stage grid mk" style="min-height:560px">
+      <div class="stage-bar"><div class="dot3"><i></i><i></i><i></i></div><span class="stage-title">Journeys › Create journey › Flow and content</span></div>
+
+      <!-- top stats + simulate -->
+      <div style="position:absolute;top:60px;left:26px;display:flex;gap:0;background:#fff;border:1px solid #E9E7E2;border-radius:12px;box-shadow:var(--shadow);overflow:hidden">
+        <div class="stat" style="padding:11px 16px"><span style="font-size:9.5px;font-weight:700;letter-spacing:.06em;color:#9C988F">REACH</span><b class="tnum" style="font-size:17px">8,200</b></div>
+        <div class="stat" style="padding:11px 16px;border-left:1px solid #EFEDE8"><span style="font-size:9.5px;font-weight:700;letter-spacing:.06em;color:#9C988F">DELIVERED</span><b class="tnum" style="font-size:17px">10,570</b></div>
+        <div class="stat" style="padding:11px 16px;border-left:1px solid #EFEDE8"><span style="font-size:9.5px;font-weight:700;letter-spacing:.06em;color:#9C988F">CONVERSIONS</span><b class="tnum" style="font-size:17px">1,312 <span style="color:var(--green);font-size:11px">16%</span></b></div>
+      </div>
+      <div style="position:absolute;top:62px;right:26px;display:flex;align-items:center;gap:8px">
+        <span style="display:inline-flex;align-items:center;gap:6px;background:var(--brand);color:#fff;font-size:12.5px;font-weight:700;padding:9px 16px;border-radius:9px;box-shadow:0 6px 14px rgba(253,95,3,.3)">▶ Simulate</span>
+        <span class="pin" style="top:-11px;right:-9px">6</span>
+      </div>
+
+      <!-- the tree -->
+      <!-- connectors -->
+      <div class="conn" style="left:50%;top:196px;width:2px;height:38px;transform:translateX(-50%)"></div>
+      <div class="eplus" style="left:50%;top:206px;transform:translate(-50%,-50%)">＋</div>
+      <div class="conn" style="left:50%;top:360px;width:2px;height:36px;transform:translateX(-50%)"></div>
+      <!-- split connectors -->
+      <div class="conn" style="left:calc(50% - 150px);top:520px;width:302px;height:2px"></div>
+      <div class="conn" style="left:calc(50% - 150px);top:520px;width:2px;height:36px"></div>
+      <div class="conn" style="left:calc(50% + 150px);top:520px;width:2px;height:36px"></div>
+      <div class="bpill yes" style="left:calc(50% - 196px);top:530px">Yes</div>
+      <div class="bpill no" style="left:calc(50% + 150px);top:530px">No</div>
+
+      <!-- entry node -->
+      <div class="node entry" style="position:absolute;left:50%;top:74px;transform:translateX(-50%)">
+        <span class="port t"></span><span class="port b" style="left:33%"></span><span class="port b" style="left:67%"></span>
+        <div class="n-badge"><i></i>On event · app_opened</div>
+        <div class="n-head"><span class="n-ico" style="background:#F59E0B18;color:#F59E0B">◆</span>
+          <div><div class="n-eye" style="color:#F59E0B">HAS DONE EVENT</div><div class="n-title">Entered journey</div></div></div>
+        <div class="n-rows"><div class="n-row"><span class="k">Event</span><span class="v acc">app_opened</span></div><div class="n-row"><span class="k">Users</span><span class="v">8,200</span></div></div>
+        <span class="pin" style="top:-11px;left:-11px">7</span>
+        <span class="pin" style="top:74px;left:-11px">9</span>
+      </div>
+
+      <!-- modal node -->
+      <div class="node" style="position:absolute;left:50%;top:236px;transform:translateX(-50%)">
+        <span class="port t"></span><span class="port b"></span>
+        <div class="n-head"><span class="n-ico" style="background:#FB651418;color:#FB6514">▢</span>
+          <div><div class="n-eye" style="color:#FB6514">MODAL</div><div class="n-title">Welcome modal</div></div></div>
+        <div class="n-rows"><div class="n-row"><span class="k">Source</span><span class="v acc">US Stocks intro</span></div><div class="n-row"><span class="k">Size</span><span class="v">MD</span></div></div>
+        <span class="pin" style="top:52px;right:-11px">8</span>
+      </div>
+
+      <!-- conditional split node -->
+      <div class="node warn" style="position:absolute;left:50%;top:398px;transform:translateX(-50%)">
+        <span class="n-err">!</span>
+        <span class="port t"></span><span class="port b" style="left:33%"></span><span class="port b" style="left:67%"></span>
+        <div class="n-head"><span class="n-ico" style="background:#8B5CF618;color:#8B5CF6">⑂</span>
+          <div><div class="n-eye" style="color:#8B5CF6">CONDITIONAL SPLIT</div><div class="n-title">KYC complete?</div></div></div>
+        <div class="n-rows"><div class="n-row"><span class="k">If</span><span class="v">KYC_Completed</span></div></div>
+        <span class="pin" style="top:-11px;right:14px">10</span>
+      </div>
+
+      <!-- toolbar -->
+      <div class="toolbar">
+        <b>＋</b><span class="sep"></span><b>−</b><span class="zoom tnum">100%</span><b>＋</b><b>⤢</b><span class="sep"></span><b>#</b><b>≡</b><span class="sep"></span><b>↶</b><b>↷</b><b>?</b>
+        <span class="pin" style="top:-11px;right:-9px">11</span>
+      </div>
+      <!-- minimap -->
+      <div style="position:absolute;bottom:16px;right:16px;width:120px;height:80px;background:#fff;border:1px solid #E9E7E2;border-radius:9px;box-shadow:var(--shadow)"></div>
+    </div>
+
+    <div class="notes">
+      <div class="note"><span class="num">6</span><div><h4>Simulate &amp; live stats</h4><p>Reach / delivered / conversions read from a dry-run so the user can gauge the flow before publishing.</p></div></div>
+      <div class="note"><span class="num">7</span><div><h4>Entry badge — no Start node</h4><p>The trigger config from setup rides as a badge on the first node. Entry is simply the node with no incoming edge.</p></div></div>
+      <div class="note"><span class="num">8</span><div><h4>Node card</h4><p>Kind icon + name + editable title, then the 2–3 highest-signal config values. Double-click (or the hover toolbar) opens the editor.</p></div></div>
+      <div class="note"><span class="num">9</span><div><h4>Ports &amp; connections</h4><p>Drag a bottom port to another node's top port to connect. Orthogonal edges; hovering shows flowing packets and a mid-edge "＋" to insert inline.</p><span class="req">Rejects cycles &amp; edges into entry</span></div></div>
+      <div class="note"><span class="num">10</span><div><h4>Needs-setup &amp; branches</h4><p>A red "!" flags an unconfigured node. Branching nodes fan into labelled ports (Yes / No, or A/B variants) that connect independently.</p><span class="req must">Publish blocks orphaned branches</span></div></div>
+      <div class="note"><span class="num">11</span><div><h4>Canvas controls</h4><p>Bottom bar: add step, zoom, fit, snap-to-grid, tidy-up (auto-layout), undo / redo, shortcuts. Full keyboard layer; minimap bottom-right.</p></div></div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 3 — PALETTE ============ -->
+  <section class="screen">
+    <div class="screen-head"><span class="n">03</span><h2>Add to journey</h2></div>
+    <p class="screen-sub">The node catalogue. Opened from the empty state, the "+" on any edge, or dropping a connection on empty canvas.</p>
+
+    <div class="stage mk">
+      <div class="card" style="padding:0;overflow:hidden;max-width:720px;margin:0 auto">
+        <div style="padding:16px 20px 0;position:relative"><h4 style="font-size:16px">Add to journey</h4><p style="font-size:12px;color:#9C988F;margin:3px 0 0">Pick a campaign type to create or import — or a logic node</p>
+          <span class="pin" style="top:14px;left:250px">12</span></div>
+        <div style="margin:13px 20px 0;display:flex;align-items:center;gap:9px;border:1.5px solid #E4E1DB;border-radius:10px;padding:9px 13px;color:#B7B2A8;font-size:13px">⌕ Search node types — modal, delay, branch…</div>
+        <div style="display:grid;grid-template-columns:180px 1fr;margin-top:13px;border-top:1px solid #F3F1EC">
+          <div style="border-right:1px solid #F3F1EC;padding:12px 10px;display:flex;flex-direction:column;gap:2px;position:relative">
+            <span class="pin" style="top:8px;right:-11px">13</span>
+            <span style="display:flex;align-items:center;gap:9px;padding:8px 11px;border-radius:9px;background:var(--brand);color:#fff;font-size:13px;font-weight:600">◧ Campaigns <b style="margin-left:auto">12</b></span>
+            <span style="display:flex;padding:8px 11px;font-size:13px;color:#40403C">Messages <b style="margin-left:auto;color:#B7B2A8">4</b></span>
+            <span style="display:flex;padding:8px 11px;font-size:13px;color:#40403C">Branching <b style="margin-left:auto;color:#B7B2A8">2</b></span>
+            <span style="display:flex;padding:8px 11px;font-size:13px;color:#40403C">Experiments <b style="margin-left:auto;color:#B7B2A8">1</b></span>
+            <span style="display:flex;padding:8px 11px;font-size:13px;color:#40403C">Delay <b style="margin-left:auto;color:#B7B2A8">1</b></span>
+            <span style="display:flex;padding:8px 11px;font-size:13px;color:#40403C">Data <b style="margin-left:auto;color:#B7B2A8">2</b></span>
+          </div>
+          <div style="padding:15px 18px;position:relative">
+            <div style="font-size:10.5px;font-weight:700;letter-spacing:.06em;color:#9C988F;margin-bottom:11px">CAMPAIGNS · 12 TYPES · PICK ONE TO CREATE OR IMPORT</div>
+            <span class="pin" style="top:34px;right:8px">14</span>
+            <div style="display:grid;grid-template-columns:1fr 1fr;gap:9px">
+              <div style="display:flex;gap:11px;padding:11px 12px;border:1px solid #E9E7E2;border-radius:11px;align-items:flex-start"><span class="n-ico" style="width:32px;height:32px;background:#FB651416;color:#FB6514">▢</span><div><div style="font-size:12.5px;font-weight:650">Modal</div><div style="font-size:11px;color:#9C988F">Centered popup dialog</div></div></div>
+              <div style="display:flex;gap:11px;padding:11px 12px;border:1px solid #E9E7E2;border-radius:11px;align-items:flex-start"><span class="n-ico" style="width:32px;height:32px;background:#FB651416;color:#FB6514">▭</span><div><div style="font-size:12.5px;font-weight:650">Bottom Sheet</div><div style="font-size:11px;color:#9C988F">Slide-up panel</div></div></div>
+              <div style="display:flex;gap:11px;padding:11px 12px;border:1px solid #E9E7E2;border-radius:11px;align-items:flex-start;background:var(--cream);box-shadow:0 6px 14px -6px rgba(16,24,40,.14)"><span class="n-ico" style="width:32px;height:32px;background:#FB651416;color:#FB6514">◫</span><div><div style="font-size:12.5px;font-weight:650">Carousel</div><div style="font-size:11px;color:#9C988F">Swipeable cards</div></div></div>
+              <div style="display:flex;gap:11px;padding:11px 12px;border:1px solid #E9E7E2;border-radius:11px;align-items:flex-start"><span class="n-ico" style="width:32px;height:32px;background:#FB651416;color:#FB6514">◉</span><div><div style="font-size:12.5px;font-weight:650">Spotlight</div><div style="font-size:11px;color:#9C988F">Highlight an element</div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="notes">
+      <div class="note"><span class="num">12</span><div><h4>Search-first</h4><p>Auto-focused search filters every node type across families; arrow keys + Enter place a node without the mouse.</p></div></div>
+      <div class="note"><span class="num">13</span><div><h4>Family rail</h4><p>Ten families with live counts. Campaigns (12), Messages (4), Branching, Experiments, Delay, Data, and the condition/AI/flow families.</p></div></div>
+      <div class="note"><span class="num">14</span><div><h4>Node cards</h4><p>Icon + name + one-line description. Click to add; or drag a row onto the canvas or onto an edge to insert inline.</p></div></div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 4 — EDITOR SHEET ============ -->
+  <section class="screen">
+    <div class="screen-head"><span class="n">04</span><h2>Node editor</h2></div>
+    <p class="screen-sub">A right-side sheet to configure a node. Every node type has one — no dead nodes.</p>
+    <div class="stage mk" style="display:flex;justify-content:flex-end">
+      <div class="card" style="width:360px;padding:0;overflow:hidden">
+        <div style="display:flex;align-items:center;gap:11px;padding:15px 18px;border-bottom:1px solid #F3F1EC;position:relative">
+          <span class="n-ico" style="background:#FB651418;color:#FB6514">▢</span>
+          <div style="flex:1"><div style="font-size:14px;font-weight:650">Welcome modal</div><div style="font-size:9px;font-weight:800;letter-spacing:.07em;color:#FB6514">MODAL</div></div>
+          <span class="tag g">READY</span><span style="color:#B7B2A8">✕</span>
+          <span class="pin" style="top:-11px;right:70px">15</span>
+        </div>
+        <div style="padding:13px 18px 0"><div style="font-size:10px;font-weight:700;letter-spacing:.07em;color:#9C988F;margin-bottom:8px">ON THE CARD</div>
+          <div class="node" style="width:auto;box-shadow:none">
+            <div class="n-head"><span class="n-ico" style="width:30px;height:30px;background:#FB651418;color:#FB6514">▢</span><div><div class="n-eye" style="color:#FB6514">MODAL</div><div class="n-title">Welcome modal</div></div></div>
+            <div class="n-rows"><div class="n-row"><span class="k">Source</span><span class="v acc">US Stocks intro</span></div><div class="n-row"><span class="k">Size</span><span class="v">MD</span></div></div>
+          </div>
+          <span class="pin" style="position:relative;top:-70px;left:250px">16</span>
+        </div>
+        <div style="padding:4px 18px 16px;position:relative"><div style="font-size:12px;font-weight:500;color:#615E59;margin-bottom:6px">Campaign</div>
+          <div style="border:1px solid #E4E1DB;border-radius:8px;padding:9px 12px;font-size:12.5px;color:#40403C;display:flex;justify-content:space-between">US Stocks intro <span style="color:#B7B2A8">▾</span></div>
+          <span class="pin" style="top:22px;right:6px">17</span></div>
+        <div style="display:flex;justify-content:flex-end;gap:10px;padding:13px 18px;border-top:1px solid #F3F1EC;position:relative">
+          <span style="font-size:12.5px;font-weight:600;color:#615E59;padding:8px 14px;border:1px solid #E4E1DB;border-radius:8px">Cancel</span>
+          <span style="font-size:12.5px;font-weight:600;color:#fff;background:var(--brand);padding:8px 14px;border-radius:8px">Save changes</span>
+          <span class="pin" style="top:-11px;right:-9px">18</span>
+        </div>
+      </div>
+    </div>
+    <div class="notes">
+      <div class="note"><span class="num">15</span><div><h4>Status pill</h4><p>READY (green) / NEEDS SETUP (amber), driven by the same validity check as the card's "!" badge.</p></div></div>
+      <div class="note"><span class="num">16</span><div><h4>Live "On the card" preview</h4><p>Shows exactly what the canvas card will become as the user edits — before saving.</p></div></div>
+      <div class="note"><span class="num">17</span><div><h4>Kind-specific form</h4><p>Each type gets a tailored form (campaign picker, message fields, condition builder, delay, split weights…).</p></div></div>
+      <div class="note"><span class="num">18</span><div><h4>Save &amp; guard</h4><p>Save is disabled until dirty and writes back live. Closing with unsaved changes asks to discard or keep editing.</p><span class="req">Edits are undo-able</span></div></div>
+    </div>
+  </section>
+
+  <!-- ============ SCREEN 5 — SPECIALISED INPUTS ============ -->
+  <section class="screen">
+    <div class="screen-head"><span class="n">05</span><h2>Specialised inputs</h2></div>
+    <p class="screen-sub">Two shared inputs carry most of the configuration weight and must match these designs exactly.</p>
+
+    <div class="stage mk" style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+      <!-- campaign picker -->
+      <div class="card" style="padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;position:relative"><div><div style="font-size:14px;font-weight:650">Import from Existing Campaigns</div><div style="font-size:11px;color:#9C988F;margin-top:3px">Search &amp; select a campaign</div></div><span style="background:var(--brand);color:#fff;font-size:11.5px;font-weight:600;padding:7px 13px;border-radius:8px">Select All</span>
+          <span class="pin" style="top:-11px;left:-11px">19</span></div>
+        <div style="margin-top:12px;border:1px solid #E9E7E2;border-radius:10px;padding:13px 15px;display:flex;align-items:center;gap:9px;background:#FFF6F0;border-color:var(--brand)">
+          <b style="font-size:13px">Summer Sale Banner</b><span style="font-size:11.5px;color:#9C988F">Jan 15, 2026</span><span class="tag g" style="font-size:10px">Active</span>
+          <span style="margin-left:auto;width:20px;height:20px;border-radius:50%;background:var(--brand);color:#fff;font-size:11px;display:grid;place-items:center">✓</span></div>
+        <div style="margin-top:9px;border:1px solid #E9E7E2;border-radius:10px;padding:13px 15px;display:flex;align-items:center;gap:9px">
+          <b style="font-size:13px">Holiday Rewards</b><span style="font-size:11.5px;color:#9C988F">Dec 20, 2025</span><span class="tag g" style="font-size:10px">Active</span></div>
+        <div style="margin-top:13px;text-align:center;background:var(--brand);color:#fff;font-size:13px;font-weight:600;padding:11px;border-radius:8px">Import Selected Campaign</div>
+      </div>
+      <!-- condition builder -->
+      <div class="card" style="padding:16px;background:#F8F7F4;position:relative">
+        <span class="pin" style="top:-11px;left:-11px">20</span>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div style="display:inline-flex;background:#fff;border:1px solid #E9E7E2;border-radius:8px;padding:3px;gap:2px">
+            <span style="padding:6px 16px;font-size:12.5px;font-weight:700;color:#fff;background:var(--brand);border-radius:6px">Event</span>
+            <span style="padding:6px 16px;font-size:12.5px;color:#615E59">Attribute</span></div>
+          <span style="width:28px;height:28px;border:1px solid #E4E1DB;border-radius:8px;display:grid;place-items:center;color:#B7B2A8;font-size:11px">✕</span></div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-top:14px">
+          <span style="border:1px solid #E4E1DB;background:#fff;border-radius:8px;padding:9px 12px;font-size:12px;color:#40403C">has executed ▾</span>
+          <span style="border:1px solid #E4E1DB;background:#fff;border-radius:8px;padding:9px 12px;font-size:12px;color:#40403C">SIP_Created ▾</span>
+          <span style="border:1px solid #E4E1DB;background:#fff;border-radius:8px;padding:9px 12px;font-size:12px;color:#40403C">≥ ▾</span>
+          <span style="border:1px solid #E4E1DB;background:#fff;border-radius:8px;padding:9px 12px;font-size:12px;color:#B7B2A8">Count</span>
+          <span style="font-size:12px;color:#615E59;align-self:center">times in the last</span></div>
+        <div style="margin-top:13px;text-align:center;border:1px dashed #C9C5BC;border-radius:9px;padding:11px;font-size:12.5px;color:#8A867E">＋ Add Another Filter Condition</div>
+      </div>
+    </div>
+    <div class="notes">
+      <div class="note"><span class="num">19</span><div><h4>Campaign picker</h4><p>For every campaign node: search &amp; multi-select existing campaigns (name · date · status), or create a new one of that type. Import is disabled until one is picked.</p><span class="req">All 12 campaign types</span></div></div>
+      <div class="note"><span class="num">20</span><div><h4>Event / Attribute condition builder</h4><p>Wherever a condition is defined: an Event or Attribute filter with operators, count, time window, and event-property rows. Stack multiple with "Add filter condition".</p><span class="req">Conditional Split · Check attribute · Has done event</span></div></div>
+    </div>
+  </section>
+
+  <footer class="foot">
+    <p>AppStorys Journey Builder — product spec. Companion engineering doc: <code>docs/engineering-spec.md</code>. Live prototype: <a href="https://appstorys-journey-setup.vercel.app">appstorys-journey-setup.vercel.app</a>. Mockups are representative; exact tokens live in <code>src/index.css</code>.</p>
+  </footer>
+</div>
+
+</body>
+</html>
